@@ -3,8 +3,7 @@
 Publish using
 
 ```bash
-$ cd site
-$ pelican content -s publishconf.py 
-$ ghp-import output -b gh-pages
-$ git push origin gh-pages
+$cd site && pelican content -o output -s pelicanconf.py && ghp-import output && git push origin gh-pages
 ```
+
+A post-commit hook is configured.
