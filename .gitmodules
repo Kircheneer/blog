@@ -1,0 +1,12 @@
+[submodule "pelican-themes"]
+	path = pelican-themes
+	url = https://github.com/getpelican/pelican-themes.git
+[submodule "simplify-theme"]
+	path = simplify-theme
+	url = https://github.com/vuquangtrong/simplify-theme.git
+[submodule "site/site"]
+	path = site/site
+	url = https://github.com/alexandrevicenzi/Flex.git
+[submodule "site/Flex"]
+	path = site/Flex
+	url = https://github.com/alexandrevicenzi/Flex.git

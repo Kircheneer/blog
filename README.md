@@ -3,7 +3,8 @@
 Publish using
 
 ```bash
-$ pelican content -o output -s pelicanconf.py
+$ cd site
+$ pelican content -s publishconf.py 
 $ ghp-import output -b gh-pages
 $ git push origin gh-pages
 ```
