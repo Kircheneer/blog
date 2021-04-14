@@ -21,11 +21,13 @@ AUTHOR_FEED_RSS = None
 THEME = "Flex"
 
 # Blogroll
-LINKS = (('Home', SITEURL),)
+LINKS = (('Home', ''),)
 
 # Social widget
-SOCIAL = (('Github', 'https://github.com/Kircheneer'),
-          ('Another social link', '#'),)
+SOCIAL = (
+    ("github", "https://github.com/Kircheneer"),
+    ("rss", "/blog/feeds/all.atom.xml"),
+)
 
 DEFAULT_PAGINATION = 10
 
