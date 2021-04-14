@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+<html lang="english">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+
+    <link id="pygments-light-theme" rel="stylesheet" type="text/css"
+          href="/theme/pygments/github.min.css">
+
+
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
+
+
+
+  
+
+
+<meta name="author" content="kirchnerl" />
+<meta name="description" content="You can find the the code used in this post here. If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository. The Netbox IPAM and DCIM tool provides webhooks as a means of integrating with other software. External software you …" />
+<meta name="keywords" content="Celery, FastAPI, Netbox, Python">
+
+
+<meta property="og:site_name" content="Kirchnered Networking"/>
+<meta property="og:title" content="Netbox webhook receiver with Python, Celery and FastAPI"/>
+<meta property="og:description" content="You can find the the code used in this post here. If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository. The Netbox IPAM and DCIM tool provides webhooks as a means of integrating with other software. External software you …"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/netbox-webhook-receiver-with-python-celery-and-fastapi.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-11-21 13:47:00+01:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/kirchnerl.html">
+<meta property="article:section" content="Programming"/>
+<meta property="article:tag" content="Celery"/>
+<meta property="article:tag" content="FastAPI"/>
+<meta property="article:tag" content="Netbox"/>
+<meta property="article:tag" content="Python"/>
+<meta property="og:image" content="">
+
+  <title>Kirchnered Networking &ndash; Netbox webhook receiver with Python, Celery and FastAPI</title>
+
+</head>
+<body class="light-theme">
+  <aside>
+    <div>
+      <a href="">
+        <img src="/theme/img/profile.png" alt="" title="">
+      </a>
+
+      <h1>
+        <a href=""></a>
+      </h1>
+
+
+
+      <nav>
+        <ul class="list">
+
+
+
+            <li>
+              <a target="_self" href="" >Home</a>
+            </li>
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-Github" href="https://github.com/Kircheneer" target="_blank">
+              <i class="fab fa-Github"></i>
+            </a>
+          </li>
+          <li>
+            <a  class="sc-Another social link" href="#" target="_blank">
+              <i class="fab fa-Another social link"></i>
+            </a>
+          </li>
+      </ul>
+    </div>
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="netbox-webhook-receiver-with-python-celery-and-fastapi">Netbox webhook receiver with Python, Celery and FastAPI</h1>
+    <p>
+      Posted on Sat 21 November 2020 in <a href="/category/programming.html">Programming</a>
+
+    </p>
+  </header>
+
+
+  <div>
+    <p><em>You can find the the code used in this post</em> <a href="https://github.com/Kircheneer/webhook_receiver"><em>here</em></a><em>. If you just
+need a webhook receiver for Netbox follow the instructions in the README.md file in that repository.</em></p>
+<p>The <a href="https://github.com/netbox-community/netbox">Netbox</a> IPAM and DCIM tool provides <a href="https://netbox.readthedocs.io/en/stable/additional-features/webhooks/">webhooks</a> as a means of integrating with other software. External software you might want to notify of changes in Netbox might be network monitoring software (NMS) or a configuration management database (CMDB). While Netbox supports <a href="https://jinja.palletsprojects.com">Jinja2</a> templating for the body of the webhook HTTP request you sometimes want to issue multiple requests in a particular sequence with some state on a single trigger event (such as a single device changing). You might also just want to run arbitrary code. In order to accomplish this it is necessary to implement a webhook receiver which is capable of execute such sequences. Faced with this challenge I decided to implement such an application using the <a href="https://fastapi.tiangolo.com/">FastAPI</a> Python web framework and the <a href="https://github.com/celery/celery">Celery</a> task queue.</p>
+<h3>Setting up Celery and FastAPI</h3>
+<p><em>If you're following along I recommend running the web app, redis database and the celery worker with Docker using
+the</em> <a href="https://github.com/Kircheneer/webhook_receiver/blob/main/Dockerfile"><em>Dockerfile</em></a> <em>and</em>
+<a href="https://github.com/Kircheneer/webhook_receiver/blob/main/docker-compose.yml"><em>docker-compose.yml</em></a> <em>from the GitHub
+repository for ease of use and to optionally use</em> <a href="https://github.com/netbox-community/netbox-docker"><em>netbox-docker</em></a>
+<em>in order to quickly spin up a Netbox testing instance.</em></p>
+<p>First we need to set up our FastAPI application and task queue. Getting FastAPI set up to trigger a Celery task is done
+rather quickly as evident in the following code example. Point any webhook from Netbox at this and perform a
+corresponding action in Netbox - this will already trigger the Celery task and subsequently log to the console of the
+Celery worker.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">celery</span> <span class="kn">import</span> <span class="n">Celery</span>
+<span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">HTTPException</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="n">celery</span><span class="p">:</span> <span class="n">Celery</span> <span class="o">=</span> <span class="n">Celery</span><span class="p">(</span>
+    <span class="vm">__file__</span><span class="p">,</span> <span class="n">broker</span><span class="o">=</span><span class="s2">&quot;redis://redis:6379&quot;</span>
+<span class="p">)</span>
+
+<span class="nd">@celery</span><span class="o">.</span><span class="n">task</span>
+<span class="k">def</span> <span class="nf">task</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;I was triggered by a </span><span class="si">{</span><span class="n">request</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">receive</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+</code></pre></div>
+
+<h3>Authenticating the webhook</h3>
+<p>Netbox allows for the configuration of a secret for each webhook. The secret is then used to compute a HMAC digest
+over the body of the webhook (in addition to the TLS already performed). This secret is passed as a HTTP Header
+"X-Hook-Signature". The following code excerpt demonstrates the verify_hmac function, which handles this authentication
+process, in conjunction with the corresponding FastAPI view. Notice how we call .body() on the Starlette
+<a href="https://www.starlette.io/requests/#body">Request</a> object in order to get a binary representation of the request
+because this is how Netbox does it.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">hmac</span>
+
+<span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">HTTPException</span>
+
+<span class="p">[</span><span class="o">...</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">verify_hmac</span><span class="p">(</span>
+    <span class="n">body</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span>
+    <span class="n">hexdigest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;secret&quot;</span><span class="p">,</span>
+    <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
+    <span class="n">digestmod</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sha512&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="n">computed_hexdigest</span> <span class="o">=</span> <span class="n">hmac</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+        <span class="n">secret</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">encoding</span><span class="p">),</span> <span class="n">body</span><span class="p">,</span> <span class="n">digestmod</span><span class="o">=</span><span class="n">digestmod</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">hexdigest</span> <span class="o">==</span> <span class="n">computed_hexdigest</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">receive</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> 
+    <span class="n">body</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">()</span>
+    <span class="n">hexdigest</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-Hook-Signature&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">verify_hmac</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">hexdigest</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Shared secret mismatch.&quot;</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> 
+</code></pre></div>
+
+<h3>Registering tasks to specific endpoints</h3>
+<p>The goal for the following sections is to allow URLs such as <code>/tenant/create</code> for the webhook triggered when tenants
+are created and then run tasks corresponding to this webhook whenever that endpoint is triggered. First of all we will
+allow path parameters in the task:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/</span><span class="si">{model}</span><span class="s2">/</span><span class="si">{action}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">receive</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">()</span>
+    <span class="n">hexdigest</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-Hook-Signature&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">verify_hmac</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">hexdigest</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Shared secret mismatch.&quot;</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> 
+</code></pre></div>
+
+<p>Now we need to create a task registry to store the tasks. It needs to do the following things:</p>
+<ul>
+<li>Provide a mechanism for registration of devices</li>
+<li>Bulk-execute applicable tasks whenever an endpoint is called</li>
+</ul>
+<p>The below class TaskRegistry provides a decorator <code>register</code>, which registers the decorated function as a task in the
+registry.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">celery</span> <span class="kn">import</span> <span class="n">Task</span>
+<span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">Request</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">TaskRegistry</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Set</span><span class="p">[</span><span class="n">Task</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Callable</span><span class="p">],</span> <span class="n">Callable</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">model</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">model</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">model</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">model</span><span class="p">][</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">model</span><span class="p">][</span><span class="n">action</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">function</span>
+
+        <span class="k">return</span> <span class="n">decorator</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tasks_to_run</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">model</span><span class="p">][</span><span class="n">action</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No tasks configured for model </span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2"> and action </span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">())</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tasks_to_run</span><span class="p">]</span>
+</code></pre></div>
+
+<p>This allows us to then define tasks like this:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">task_registry</span> <span class="kn">import</span> <span class="n">TaskRegistry</span>
+
+<span class="p">[</span><span class="o">...</span><span class="p">]</span>
+
+<span class="n">registry</span><span class="p">:</span> <span class="n">TaskRegistry</span> <span class="o">=</span> <span class="n">TaskRegistry</span><span class="p">()</span> 
+
+<span class="nd">@registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;tenant&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;create&quot;</span><span class="p">)</span>
+<span class="nd">@celery</span><span class="o">.</span><span class="n">task</span>
+<span class="k">def</span> <span class="nf">task</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;I was triggered by a </span><span class="si">{</span><span class="n">request</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span> 
+</code></pre></div>
+
+<p>From the FastAPI view we can then call <code>execute</code> on the registry in order to run all the applicable tasks:</p>
+<div class="highlight"><pre><span></span><code><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/</span><span class="si">{model}</span><span class="s2">/</span><span class="si">{action}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">receive</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">()</span>
+    <span class="n">hexdigest</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-Hook-Signature&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">verify_hmac</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">hexdigest</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Shared secret mismatch.&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">registry</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
+</code></pre></div>
+
+<p>If you find that your tasks are not executing make sure that they are actually being imported. IDEs might remove the
+import of the tasks if they are in seperate files and/or modules, because they don't pick up on either Celery tasks or
+tasks registered in our own TaskRegistry.</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/celery.html">Celery</a>
+      <a href="/tag/fastapi.html">FastAPI</a>
+      <a href="/tag/netbox.html">Netbox</a>
+      <a href="/tag/python.html">Python</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>
+Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " Kirchnered Networking ",
+  "url" : "",
+  "image": "",
+  "description": ""
+}
+</script>
+
+</body>
+</html>

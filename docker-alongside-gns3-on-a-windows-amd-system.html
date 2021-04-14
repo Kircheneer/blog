@@ -1,0 +1,281 @@
+
+<!DOCTYPE html>
+<html lang="english">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+
+    <link id="pygments-light-theme" rel="stylesheet" type="text/css"
+          href="/theme/pygments/github.min.css">
+
+
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
+
+
+
+  
+
+
+<meta name="author" content="kirchnerl" />
+<meta name="description" content="When trying to run Docker and GNS3 on the same Windows system with an AMD processor I was faced with the following challenges: Docker for Desktop on Windows requires Hyper-V or WSL2, the latter in turn requires Hyper-V Hyper-V on AMD processors only supports nested virtualization as of 2020 (in …" />
+<meta name="keywords" content="GNS3, Linux, Networking">
+
+
+<meta property="og:site_name" content="Kirchnered Networking"/>
+<meta property="og:title" content="Docker alongside GNS3 on a Windows / AMD system"/>
+<meta property="og:description" content="When trying to run Docker and GNS3 on the same Windows system with an AMD processor I was faced with the following challenges: Docker for Desktop on Windows requires Hyper-V or WSL2, the latter in turn requires Hyper-V Hyper-V on AMD processors only supports nested virtualization as of 2020 (in …"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/docker-alongside-gns3-on-a-windows-amd-system.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-11-23 19:49:00+01:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/kirchnerl.html">
+<meta property="article:section" content="Networking"/>
+<meta property="article:tag" content="GNS3"/>
+<meta property="article:tag" content="Linux"/>
+<meta property="article:tag" content="Networking"/>
+<meta property="og:image" content="">
+
+  <title>Kirchnered Networking &ndash; Docker alongside GNS3 on a Windows / AMD system</title>
+
+</head>
+<body class="light-theme">
+  <aside>
+    <div>
+      <a href="">
+        <img src="/theme/img/profile.png" alt="" title="">
+      </a>
+
+      <h1>
+        <a href=""></a>
+      </h1>
+
+
+
+      <nav>
+        <ul class="list">
+
+
+
+            <li>
+              <a target="_self" href="" >Home</a>
+            </li>
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-Github" href="https://github.com/Kircheneer" target="_blank">
+              <i class="fab fa-Github"></i>
+            </a>
+          </li>
+          <li>
+            <a  class="sc-Another social link" href="#" target="_blank">
+              <i class="fab fa-Another social link"></i>
+            </a>
+          </li>
+      </ul>
+    </div>
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="docker-alongside-gns3-on-a-windows-amd-system">Docker alongside GNS3 on a Windows / AMD system</h1>
+    <p>
+      Posted on Mon 23 November 2020 in <a href="/category/networking.html">Networking</a>
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>When trying to run <a href="https://www.docker.com/">Docker</a> and <a href="https://gns3.com/">GNS3</a> on the same Windows system with an
+AMD processor I was faced with the following challenges:</p>
+<ul>
+<li><a href="https://docs.docker.com/docker-for-windows/install/">Docker for Desktop</a> on Windows requires Hyper-V or WSL2,
+  the latter in turn requires Hyper-V</li>
+<li>Hyper-V on AMD processors only supports nested virtualization as of
+  <a href="https://techcommunity.microsoft.com/t5/virtualization/amd-nested-virtualization-support/ba-p/1434841">2020</a>
+  (in fact the official docs still say that
+  "<a href="https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/nested-virtualization">nesting is currently Intel-only</a>")</li>
+<li>Hyper-V officially supports only Hyper-V itself for netsed virtualization, therefore rendering it useless for
+  running GNS3</li>
+</ul>
+<p>After being fed up with running GNS3 on a separate physical Linux machine I tried to come up with an actual solution to
+the problem. Seeing as I was already running Docker and GNS3 on an Ubuntu device I figured it should be possible to expose both of that to a Windows host through a (non Hyper-V!) VM.</p>
+<h2>Installing GNS3 in a Ubuntu VM</h2>
+<p><em>You need a working Ubuntu VM with a network interface bridged to the internet-facing interface of the host system to
+follow along. Seeing as there are already lots of very good tutorials on virtualization and the installation of Ubuntu
+I won't cover this here. Free options are for example <a href="https://www.virtualbox.org/">VirtualBox</a> or
+<a href="https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html">VMWare Workstation Player</a>
+(assuming you use it non-commercially).</em></p>
+<p>First off, make sure your VM is able to actually perform nested virtualization, as without it, this whole exercise
+would be quite pointless.</p>
+<div class="highlight"><pre><span></span><code>$ kvm-ok
+INFO: /dev/kvm exists
+KVM acceleration can be used
+</code></pre></div>
+
+<p>The GNS3 <a href="https://docs.gns3.com/docs/getting-started/installation/linux/">documentation</a> for installing it on a
+Ubuntu-based distro is straight-forward. One thing I found was missing there was the daemonization of GNS3. Fortunately
+enough they provide a Systemd service file
+<a href="https://raw.githubusercontent.com/GNS3/gns3-server/master/init/gns3.service.systemd">here</a>. The following steps
+configure the GNS3 daemon:</p>
+<div class="highlight"><pre><span></span><code>$ <span class="nb">cd</span> /etc/systemd/system
+$ sudo wget https://raw.githubusercontent.com/GNS3/gns3-server/master/init/gns3.service.systemd
+$ sudo mv gns3.service.systemd gns3.service
+$ sudo useradd gns3
+$ sudo usermod -aG ubridge gns3
+$ sudo usermod -aG libvirt gns3 
+$ sudo usermod -aG kvm gns3
+$ sudo usermod -aG wireshark gns3
+$ sudo usermod -aG docker gns3
+$ sudo sed -i <span class="s1">&#39;s/\/var\/run\/run/&#39;</span> gns3.service
+</code></pre></div>
+
+<p>The last line fixes the fact that <code>/var/run</code> symlinks to <code>/run</code> on newer Ubuntu distributions. Start and enable the
+service to run on startup and check on its status. If you the <code>Active: active (running)</code> then everything went well.</p>
+<div class="highlight"><pre><span></span><code>$ sudo systemctl start gns3
+$ sudo systemctl <span class="nb">enable</span> gns3
+$ sudo systemctl status gns3
+● gns3.service - GNS3 server
+    Loaded: loaded <span class="o">(</span>/etc/systemd/system/gns3.service<span class="p">;</span> enabled<span class="p">;</span> vendor preset: enabled<span class="o">)</span>
+    Active: active <span class="o">(</span>running<span class="o">)</span> since Mon <span class="m">2020</span>-11-23 <span class="m">20</span>:05:39 CET<span class="p">;</span> 18s ago
+<span class="o">[</span>...<span class="o">]</span>
+</code></pre></div>
+
+<p>Finally, either make sure that the host firewall is inactive or open the port in order to be able to access the GNS3
+server from your Windows host:</p>
+<div class="highlight"><pre><span></span><code>$ sudo ufw status
+ Status: inactive
+<span class="c1"># OR</span>
+$ sudo ufw allow <span class="m">80</span>
+</code></pre></div>
+
+<p>The last remaining step is to configure your GNS3 to use the server as the primary server. To check on how to do that,
+take a look <a href="https://docs.gns3.com/docs/getting-started/installation/one-server-multiple-clients/">here</a>.</p>
+<h2>Exposing Docker in a Ubuntu VM</h2>
+<p><strong><em>Disclaimer</em></strong><strong>:</strong> <em>The below steps expose an unauthenticated and unencrypted HTTP Docker daemon to the network.
+Do not do this in a production environment or really anywhere that isn't on your home network. To find out how to
+secure the Docker daemon, take a look</em> <a href="https://docs.docker.com/engine/security/https/"><em>here</em></a><em>.</em></p>
+<p>If you haven't already installed Docker during the course of the GNS3 installation, take a look at how to install
+Docker on a Ubuntu system <a href="https://docs.docker.com/engine/install/ubuntu/">here</a>. Out of the box the Docker daemon
+runs locally on a <a href="https://man7.org/linux/man-pages/man7/unix.7.html">Unix socket</a>, walled of from the network. Because
+we want to access it from our Windows host (which is reachable only through the network interface), we need to change
+this. Systemd provides a mechanism for editing the service files without changing the original service file. This is
+neat, because it ensures that the configuration properly persists through updates of the Docker packages.</p>
+<p>Use the following commands to automatically create a <code>gns3.service.d</code> directory and <code>override.conf</code> with a
+configuration that exposes the Docker daemon on port TCP/4243 of the VM (as demonstrated above make sure the firewall
+configuration matches this). If you want to use Docker containers within GNS3 it is vital that you keep the Unix socket
+configuration next to the TCP configuration, otherwise the GNS3 daemon will find itself unable to talk to the Docker
+daemon.</p>
+<div class="highlight"><pre><span></span><code>$ sudo systemctl edit docker.service /etc/systemd/system/docker.service
+<span class="c1">## Enter following content into file</span>
+<span class="o">[</span>Service<span class="o">]</span>
+<span class="nv">ExecStart</span><span class="o">=</span>
+<span class="nv">ExecStart</span><span class="o">=</span>/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:4243
+</code></pre></div>
+
+<p>You can also verify if your changes the service file were applied properly:</p>
+<div class="highlight"><pre><span></span><code><span class="err">$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="n">systemctl</span><span class="w"> </span><span class="n">cat</span><span class="w"> </span><span class="n">docker</span><span class="w"></span>
+<span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="k">system</span><span class="o">/</span><span class="n">docker</span><span class="p">.</span><span class="n">service</span><span class="w"></span>
+<span class="o">[</span><span class="n">...</span><span class="o">]</span><span class="w"></span>
+<span class="err">#</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="k">system</span><span class="o">/</span><span class="n">docker</span><span class="p">.</span><span class="n">service</span><span class="p">.</span><span class="n">d</span><span class="o">/</span><span class="n">override</span><span class="p">.</span><span class="n">conf</span><span class="w"></span>
+<span class="o">[</span><span class="n">Service</span><span class="o">]</span><span class="w"></span>
+<span class="n">ExecStart</span><span class="o">=</span><span class="w"></span>
+<span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">dockerd</span><span class="w"> </span><span class="o">-</span><span class="n">H</span><span class="w"> </span><span class="nl">fd</span><span class="p">:</span><span class="o">//</span><span class="w"> </span><span class="o">-</span><span class="n">H</span><span class="w"> </span><span class="nl">tcp</span><span class="p">:</span><span class="o">//</span><span class="mf">0.0.0.0</span><span class="err">:</span><span class="mi">4243</span><span class="w"></span>
+</code></pre></div>
+
+<p>Finishing up, we need to reload the service files and then restart the service.</p>
+<div class="highlight"><pre><span></span><code><span class="o">$</span> <span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+<span class="o">$</span> <span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span>
+</code></pre></div>
+
+<p>Your Docker daemon should now be up and running:</p>
+<div class="highlight"><pre><span></span><code>$ netstat -tpln <span class="p">|</span> grep <span class="m">4243</span>
+tcp6       <span class="m">0</span>      <span class="m">0</span> :::4243                 :::*                    LISTEN      -
+</code></pre></div>
+
+<h2>Docker configuration on the Windows host</h2>
+<p><em>If you don't mind installing the Docker daemon (even though you won't run it) as well as</em> <code>docker.exe</code> <em>and</em>
+<code>docker-compose.exe</code> <em>on your Windows system you can simply use the</em>
+<a href="https://docs.docker.com/docker-for-windows/"><em>official installer</em></a><em>. Otherwise you can grab the newest release from</em>
+<a href="https://github.com/docker/cli"><em>here</em></a><em>.</em></p>
+<p>In order to configure your newly aquired Docker CLI to use the remote Docker daemon, you can either set the environment
+variable <code>DOCKER_HOST</code> to the Ubuntu VM (e.g. <code>tcp://192.168.0.100:4243</code>), use <code>docker -H tcp://192.178.0.100:4243 ...</code>
+or use the<a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon">configuration file</a>.
+With either of these options configured properly you should now be able to use the Docker (or docker-compose)
+CLI from your Windows host:</p>
+<div class="highlight"><pre><span></span><code><span class="n">PS</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">run</span> <span class="n">hello-world</span>
+ <span class="n">Hello</span> <span class="n">from</span> <span class="n">Docker</span><span class="p">!</span>
+ <span class="n">This</span> <span class="n">message</span> <span class="n">shows</span> <span class="n">that</span> <span class="n">your</span> <span class="n">installation</span> <span class="n">appears</span> <span class="n">to</span> <span class="n">be</span> <span class="n">working</span> <span class="n">correctly</span><span class="p">.</span>
+ <span class="n">To</span> <span class="n">generate</span> <span class="n">this</span> <span class="n">message</span><span class="p">,</span> <span class="n">Docker</span> <span class="n">took</span> <span class="n">the</span> <span class="n">following</span> <span class="n">steps</span><span class="err">:</span>
+ <span class="n">The</span> <span class="n">Docker</span> <span class="n">client</span> <span class="n">contacted</span> <span class="n">the</span> <span class="n">Docker</span> <span class="n">daemon</span><span class="p">.</span>
+ <span class="n">The</span> <span class="n">Docker</span> <span class="n">daemon</span> <span class="n">pulled</span> <span class="n">the</span> <span class="s2">&quot;hello-world&quot;</span> <span class="n">image</span> <span class="n">from</span> <span class="n">the</span> <span class="n">Docker</span> <span class="n">Hub</span><span class="p">.</span>
+ <span class="p">(</span><span class="n">amd64</span><span class="p">)</span>
+ <span class="n">The</span> <span class="n">Docker</span> <span class="n">daemon</span> <span class="n">created</span> <span class="n">a</span> <span class="n">new</span> <span class="n">container</span> <span class="n">from</span> <span class="n">that</span> <span class="n">image</span> <span class="n">which</span> <span class="n">runs</span> <span class="n">the</span>
+ <span class="n">executable</span> <span class="n">that</span> <span class="n">produces</span> <span class="n">the</span> <span class="n">output</span> <span class="n">you</span> <span class="n">are</span> <span class="n">currently</span> <span class="n">reading</span><span class="p">.</span>
+ <span class="n">The</span> <span class="n">Docker</span> <span class="n">daemon</span> <span class="n">streamed</span> <span class="n">that</span> <span class="n">output</span> <span class="n">to</span> <span class="n">the</span> <span class="n">Docker</span> <span class="n">client</span><span class="p">,</span> <span class="n">which</span> <span class="n">sent</span> <span class="n">it</span>
+ <span class="n">to</span> <span class="n">your</span> <span class="n">terminal</span><span class="p">.</span> 
+ <span class="n">To</span> <span class="k">try</span> <span class="n">something</span> <span class="n">more</span> <span class="n">ambitious</span><span class="p">,</span> <span class="n">you</span> <span class="n">can</span> <span class="n">run</span> <span class="n">an</span> <span class="n">Ubuntu</span> <span class="n">container</span> <span class="n">with</span><span class="err">:</span>
+  <span class="p">$</span> <span class="n">docker</span> <span class="n">run</span> <span class="n">-it</span> <span class="n">ubuntu</span> <span class="n">bash</span>
+ <span class="n">Share</span> <span class="n">images</span><span class="p">,</span> <span class="n">automate</span> <span class="n">workflows</span><span class="p">,</span> <span class="n">and</span> <span class="n">more</span> <span class="n">with</span> <span class="n">a</span> <span class="n">free</span> <span class="n">Docker</span> <span class="n">ID</span><span class="err">:</span>
+  <span class="n">https</span><span class="err">:</span><span class="p">//</span><span class="n">hub</span><span class="p">.</span><span class="n">docker</span><span class="p">.</span><span class="n">com</span><span class="p">/</span>
+ <span class="k">For</span> <span class="n">more</span> <span class="n">examples</span> <span class="n">and</span> <span class="n">ideas</span><span class="p">,</span> <span class="n">visit</span><span class="err">:</span>
+  <span class="n">https</span><span class="err">:</span><span class="p">//</span><span class="n">docs</span><span class="p">.</span><span class="n">docker</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="nb">get-started</span><span class="p">/</span>
+</code></pre></div>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/gns3.html">GNS3</a>
+      <a href="/tag/linux.html">Linux</a>
+      <a href="/tag/networking.html">Networking</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>
+Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " Kirchnered Networking ",
+  "url" : "",
+  "image": "",
+  "description": ""
+}
+</script>
+
+</body>
+</html>

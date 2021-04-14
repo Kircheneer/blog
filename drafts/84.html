@@ -1,0 +1,226 @@
+
+<!DOCTYPE html>
+<html lang="english">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+
+    <link id="pygments-light-theme" rel="stylesheet" type="text/css"
+          href="/theme/pygments/github.min.css">
+
+
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
+
+
+
+  
+
+
+<meta name="author" content="kirchnerl" />
+<meta name="description" content="Recently I&#39;ve been working on adding type hints (see PEP484) to the Network Automation and Programmability Abstraction Layer with Multivendor support (NAPALM). This was my first more-or-less major open source contribution so I though it might be interesting to elaborate on the process. Type hints in combination with a type …" />
+<meta name="keywords" content="Mypy, NAPALM, Python">
+
+
+<meta property="og:site_name" content="Kirchnered Networking"/>
+<meta property="og:title" content="Adding type hint support to NAPALM"/>
+<meta property="og:description" content="Recently I&#39;ve been working on adding type hints (see PEP484) to the Network Automation and Programmability Abstraction Layer with Multivendor support (NAPALM). This was my first more-or-less major open source contribution so I though it might be interesting to elaborate on the process. Type hints in combination with a type …"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/drafts/84.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2021-03-27 19:20:00+01:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/kirchnerl.html">
+<meta property="article:section" content="Programming"/>
+<meta property="article:tag" content="Mypy"/>
+<meta property="article:tag" content="NAPALM"/>
+<meta property="article:tag" content="Python"/>
+<meta property="og:image" content="">
+
+  <title>Kirchnered Networking &ndash; Adding type hint support to NAPALM</title>
+
+</head>
+<body class="light-theme">
+  <aside>
+    <div>
+      <a href="">
+        <img src="/theme/img/profile.png" alt="" title="">
+      </a>
+
+      <h1>
+        <a href=""></a>
+      </h1>
+
+
+
+      <nav>
+        <ul class="list">
+
+
+
+            <li>
+              <a target="_self" href="" >Home</a>
+            </li>
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-Github" href="https://github.com/Kircheneer" target="_blank">
+              <i class="fab fa-Github"></i>
+            </a>
+          </li>
+          <li>
+            <a  class="sc-Another social link" href="#" target="_blank">
+              <i class="fab fa-Another social link"></i>
+            </a>
+          </li>
+      </ul>
+    </div>
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="84">Adding type hint support to NAPALM</h1>
+    <p>
+      Posted on Sat 27 March 2021 in <a href="/category/programming.html">Programming</a>
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>Recently I've been working on adding type hints (see
+<a href="https://www.python.org/dev/peps/pep-0484/" title="https://www.python.org/dev/peps/pep-0484/">PEP484</a>) to the Network
+Automation and Programmability Abstraction Layer with Multivendor support
+(<a href="https://napalm.readthedocs.io/en/latest/" title="https://napalm.readthedocs.io/en/latest/">NAPALM</a>). This was my first
+more-or-less major open source contribution so I though it might be interesting to elaborate on the process. Type hints
+in combination with a type checker such as <a href="http://mypy-lang.org/" title="http://mypy-lang.org/">Mypy</a> allow for static
+analysis of Python programs (which are normally dynamically typed). The following code is a example of a type hinted
+function.</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">sum_and_multiply</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">b</span>
+</code></pre></div>
+
+<p>To start off I decided to only tackle the <code>NXOS</code> driver and the base <code>NetworkDriver</code> class, because type hinting all of the</p>
+<h2>Prerequisites</h2>
+<p>Running Mypy against the submodule <code>napalm.base</code> with the <code>disallow-untyped-defs</code> flag yielded more than 600 errors
+prior to the changes I made.</p>
+<div class="highlight"><pre><span></span><code><span class="err">$</span> <span class="n">mypy</span> <span class="o">-</span><span class="n">p</span> <span class="n">napalm</span><span class="o">.</span><span class="n">base</span> <span class="o">--</span><span class="n">disallow</span><span class="o">-</span><span class="n">untyped</span><span class="o">-</span><span class="n">defs</span>
+<span class="p">[</span><span class="o">...</span><span class="p">]</span>
+<span class="n">Found</span> <span class="mi">655</span> <span class="n">errors</span> <span class="ow">in</span> <span class="mi">34</span> <span class="n">files</span> <span class="p">(</span><span class="n">checked</span> <span class="mi">25</span> <span class="n">source</span> <span class="n">files</span><span class="p">)</span>
+</code></pre></div>
+
+<p>These mostly consist of untyped function or method defintions. Another common error is an import that doesn't implement
+type hints. At the time of writing, not a lot of dependencies of NAPALM implement type hints. I found my starting point
+in all of this in the models used for testing the
+<a href="https://napalm.readthedocs.io/en/latest/support/index.html#getters-support-matrix" title="https://napalm.readthedocs.io/en/latest/support/index.html#getters-support-matrix">getter methods</a>,
+which are NAPALMs way of (vendor-independantly) getting data from network devices in a common form. The following is an
+excerpt from <code>napalm.base.test.models</code> showing the model that <code>get_facts</code> is tested against before any work towards
+type hints was done.</p>
+<div class="highlight"><pre><span></span><code><span class="n">facts</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;os_version&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s2">&quot;uptime&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="s2">&quot;interface_list&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="s2">&quot;vendor&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s2">&quot;serial_number&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="s2">&quot;fqdn&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>All the models were present in this format, which allows the unit tests to check, if the getter output data conforms to
+this format. Unfortunately, the following is not possible with this format:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ExampleDriver</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_facts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">facts</span><span class="p">:</span>
+        <span class="k">pass</span>
+</code></pre></div>
+
+<p>Fortunately though, the <code>typing</code> module (or the <code>typing_extensions</code> module prior to Python 3.7) provides a Type called
+<code>TypedDict</code> (see <a href="https://www.python.org/dev/peps/pep-0589/">PEP589</a>). This allows for more granularity than the
+standard <code>Dict</code> annotation, which allows generic keys in the dictionary. A <code>TypedDict</code> for the above model could look
+like this (using the alternative syntax for ease of migration).</p>
+<div class="highlight"><pre><span></span><code><span class="n">FactsDict</span> <span class="o">=</span> <span class="n">TypedDict</span><span class="p">(</span>
+    <span class="s2">&quot;FactsDict&quot;</span><span class="p">,</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;os_version&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s2">&quot;uptime&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="s2">&quot;interface_list&quot;</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+        <span class="s2">&quot;vendor&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s2">&quot;serial_number&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="s2">&quot;fqdn&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<p>Note that not much has actually changed here, but we can now use this type in type hints for our <code>get_facts</code> function
+from earlier.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ExampleDriver</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_facts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Facts</span><span class="p">:</span>
+        <span class="k">pass</span>
+</code></pre></div>
+
+<h2>Type hinting the base class</h2>
+<p>With most of the data moddeling out of the the next step was putting in the actual type hints. Any NAPALM driver (in
+the core module or a 3rd party one) has to inherit the <code>NetworkDriver</code> class from <code>napalm.base.base</code>. This therefore
+looked like a great starting point for adding type hints. After all the models were converted to <code>TypedDict</code> instances,
+I was able to annotate a lot of the methods with just those models. While type hinting the code base further I found
+lots of errors with the models I made in the first step so I gradually iterated on those until they worked for both the
+NXOS SSH and NXAPI drivers</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/mypy.html">Mypy</a>
+      <a href="/tag/napalm.html">NAPALM</a>
+      <a href="/tag/python.html">Python</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>
+Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " Kirchnered Networking ",
+  "url" : "",
+  "image": "",
+  "description": ""
+}
+</script>
+
+</body>
+</html>
