@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="english">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -10,23 +10,34 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/stylesheet/style.min.css">
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
 
 
     <link id="pygments-light-theme" rel="stylesheet" type="text/css"
-          href="https://kircheneer.github.io/blog/theme/pygments/github.min.css">
+          href="/theme/pygments/github.min.css">
 
 
-  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/fontawesome.css">
-  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/brands.css">
-  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/solid.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
 
 
-    <link href="https://kircheneer.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
 
 
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 
 
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#777">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#777">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#777">
 
 <meta name="author" content="kirchnerl" />
 <meta name="description" content="You can find the the code used in this post here. If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository. The Netbox IPAM and DCIM tool provides webhooks as a means of integrating with other software. External software you …" />
@@ -37,17 +48,17 @@
 <meta property="og:title" content="Netbox webhook receiver with Python, Celery and FastAPI"/>
 <meta property="og:description" content="You can find the the code used in this post here. If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository. The Netbox IPAM and DCIM tool provides webhooks as a means of integrating with other software. External software you …"/>
 <meta property="og:locale" content="en_US"/>
-<meta property="og:url" content="https://kircheneer.github.io/blog/netbox-webhook-receiver-with-python-celery-and-fastapi.html"/>
+<meta property="og:url" content="/netbox-webhook-receiver-with-python-celery-and-fastapi.html"/>
 <meta property="og:type" content="article"/>
 <meta property="article:published_time" content="2020-11-21 13:47:00+01:00"/>
 <meta property="article:modified_time" content=""/>
-<meta property="article:author" content="https://kircheneer.github.io/blog/author/kirchnerl.html">
+<meta property="article:author" content="/author/kirchnerl.html">
 <meta property="article:section" content="Programming"/>
 <meta property="article:tag" content="Celery"/>
 <meta property="article:tag" content="FastAPI"/>
 <meta property="article:tag" content="Netbox"/>
 <meta property="article:tag" content="Python"/>
-<meta property="og:image" content="">
+<meta property="og:image" content="/images/profile.png">
 
   <title>Kirchnered Networking &ndash; Netbox webhook receiver with Python, Celery and FastAPI</title>
 
@@ -55,12 +66,12 @@
 <body class="light-theme">
   <aside>
     <div>
-      <a href="https://kircheneer.github.io/blog">
-        <img src="https://kircheneer.github.io/blog/theme/img/profile.png" alt="" title="">
+      <a href="">
+        <img src="/images/profile.png" alt="" title="">
       </a>
 
       <h1>
-        <a href="https://kircheneer.github.io/blog"></a>
+        <a href=""></a>
       </h1>
 
 
@@ -93,13 +104,23 @@
   </aside>
   <main>
 
+    <nav>
+      <a href="">Home</a>
+
+      <a href="/archives.html">Archives</a>
+      <a href="/categories.html">Categories</a>
+      <a href="/tags.html">Tags</a>
+
+      <a href="/feeds/all.atom.xml">Atom</a>
+
+    </nav>
 
 <article class="single">
   <header>
       
     <h1 id="netbox-webhook-receiver-with-python-celery-and-fastapi">Netbox webhook receiver with Python, Celery and FastAPI</h1>
     <p>
-      Posted on Sat 21 November 2020 in <a href="https://kircheneer.github.io/blog/category/programming.html">Programming</a>
+      Posted on Sa 21 November 2020 in <a href="/category/programming.html">Programming</a>
 
     </p>
   </header>
@@ -267,10 +288,10 @@ tasks registered in our own TaskRegistry.</p>
   </div>
   <div class="tag-cloud">
     <p>
-      <a href="https://kircheneer.github.io/blog/tag/celery.html">Celery</a>
-      <a href="https://kircheneer.github.io/blog/tag/fastapi.html">FastAPI</a>
-      <a href="https://kircheneer.github.io/blog/tag/netbox.html">Netbox</a>
-      <a href="https://kircheneer.github.io/blog/tag/python.html">Python</a>
+      <a href="/tag/celery.html">Celery</a>
+      <a href="/tag/fastapi.html">FastAPI</a>
+      <a href="/tag/netbox.html">Netbox</a>
+      <a href="/tag/python.html">Python</a>
     </p>
   </div>
 
@@ -295,8 +316,8 @@ Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a 
   "@context" : "http://schema.org",
   "@type" : "Blog",
   "name": " Kirchnered Networking ",
-  "url" : "https://kircheneer.github.io/blog",
-  "image": "",
+  "url" : "",
+  "image": "/images/profile.png",
   "description": ""
 }
 </script>
