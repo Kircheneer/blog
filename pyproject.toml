@@ -5,8 +5,8 @@ description = "My blog at blog.kirchne.red"
 authors = ["Leo Kirchner <leo@kirchne.red>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-pelican = "^4.6.0"
+python = "^3.8"
+pelican = {extras = ["markdown"], version = "^4.6.0"}
 ghp-import = "^1.1.0"
 invoke = "^1.5.0"
 
