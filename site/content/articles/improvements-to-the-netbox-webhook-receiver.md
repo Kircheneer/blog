@@ -9,7 +9,7 @@ Status: published
 *You can find the the code used in this post [here](https://github.com/Kircheneer/webhook_receiver/tree/v0.1.0).
 If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository.*
 
-This is a follow-up to my earlier blog post[Netbox webhook receiver with Python, Celery and FastAPI](https://blog.kirchne.red/programming/netbox-webhook-receiver-with-python-celery-and-fastapi/).
+This is a follow-up to my earlier blog post [Netbox webhook receiver with Python, Celery and FastAPI](https://blog.kirchne.red/programming/netbox-webhook-receiver-with-python-celery-and-fastapi/).
 Here we see two major improvements over the previous iteration:
 
 - Consolidating webhook configuration on the [Netbox](https://github.com/netbox-community/netbox)
@@ -171,7 +171,7 @@ tasks to the root registry and then manually applies the `register` decorator (w
 
 Finally, the plugin registry has to be created. We pass a `name` parameter to the `__init__` method in order to
 identify the plugin when logging and then create the register decorator. Since the class is unaware of celery, this
-only registers the task in the plugin task registry to later be registered whith the root registry (as evident by the
+only registers the task in the plugin task registry to later be registered with the root registry (as evident by the
 `Callable` in the inherited class).
 
 ```python
