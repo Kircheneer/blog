@@ -31,3 +31,4 @@ MENUITEMS = (
 )
 BROWSER_COLOR = "#333"
 RELATIVE_URLS = False
+EXTRA_PATH_METADATA = {'extra/CNAME': {'path': 'CNAME'},}
