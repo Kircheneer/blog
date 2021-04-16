@@ -137,7 +137,7 @@ prior to the changes I made.</p>
 <span class="n">Found</span> <span class="mi">655</span> <span class="n">errors</span> <span class="ow">in</span> <span class="mi">34</span> <span class="n">files</span> <span class="p">(</span><span class="n">checked</span> <span class="mi">25</span> <span class="n">source</span> <span class="n">files</span><span class="p">)</span>
 </code></pre></div>
 
-<p>These mostly consist of untyped function or method defintions. Another common error is an import that doesn't implement
+<p>These mostly consist of untyped function or method definitions. Another common error is an import that doesn't implement
 type hints. At the time of writing, not a lot of dependencies of NAPALM implement type hints. I found my starting point
 in all of this in the models used for testing the
 <a href="https://napalm.readthedocs.io/en/latest/support/index.html#getters-support-matrix" title="https://napalm.readthedocs.io/en/latest/support/index.html#getters-support-matrix">getter methods</a>,
@@ -190,7 +190,7 @@ from earlier.</p>
 </code></pre></div>
 
 <h2>Type hinting the base class</h2>
-<p>With most of the data moddeling out of the the next step was putting in the actual type hints. Any NAPALM driver (in
+<p>With most of the data modeling out of the the next step was putting in the actual type hints. Any NAPALM driver (in
 the core module or a 3rd party one) has to inherit the <code>NetworkDriver</code> class from <code>napalm.base.base</code>. This therefore
 looked like a great starting point for adding type hints. After all the models were converted to <code>TypedDict</code> instances,
 I was able to annotate a lot of the methods with just those models. While type hinting the code base further I found

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"><title>Kirchnered Networking - Programming</title><link href="https://kircheneer.github.io/blog/" rel="alternate"></link><link href="https://kircheneer.github.io/blog/feeds/programming.atom.xml" rel="self"></link><id>https://kircheneer.github.io/blog/</id><updated>2020-12-19T12:36:00+01:00</updated><entry><title>Improvements to the Netbox webhook receiver</title><link href="https://kircheneer.github.io/blog/improvements-to-the-netbox-webhook-receiver.html" rel="alternate"></link><published>2020-12-19T12:36:00+01:00</published><updated>2020-12-19T12:36:00+01:00</updated><author><name>kirchnerl</name></author><id>tag:kircheneer.github.io,2020-12-19:/blog/improvements-to-the-netbox-webhook-receiver.html</id><summary type="html">&lt;p&gt;&lt;em&gt;You can find the the code used in this post &lt;a href="https://github.com/Kircheneer/webhook_receiver/tree/v0.1.0"&gt;here&lt;/a&gt;.
 If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository.&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;This is a follow-up to my earlier blog post&lt;a href="https://blog.kirchne.red/programming/netbox-webhook-receiver-with-python-celery-and-fastapi/"&gt;Netbox webhook receiver with Python, Celery and FastAPI&lt;/a&gt;.
+&lt;p&gt;This is a follow-up to my earlier blog post &lt;a href="https://blog.kirchne.red/programming/netbox-webhook-receiver-with-python-celery-and-fastapi/"&gt;Netbox webhook receiver with Python, Celery and FastAPI&lt;/a&gt;.
 Here we …&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;em&gt;You can find the the code used in this post &lt;a href="https://github.com/Kircheneer/webhook_receiver/tree/v0.1.0"&gt;here&lt;/a&gt;.
 If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository.&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;This is a follow-up to my earlier blog post&lt;a href="https://blog.kirchne.red/programming/netbox-webhook-receiver-with-python-celery-and-fastapi/"&gt;Netbox webhook receiver with Python, Celery and FastAPI&lt;/a&gt;.
+&lt;p&gt;This is a follow-up to my earlier blog post &lt;a href="https://blog.kirchne.red/programming/netbox-webhook-receiver-with-python-celery-and-fastapi/"&gt;Netbox webhook receiver with Python, Celery and FastAPI&lt;/a&gt;.
 Here we see two major improvements over the previous iteration:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Consolidating webhook configuration on the &lt;a href="https://github.com/netbox-community/netbox"&gt;Netbox&lt;/a&gt;
@@ -154,7 +154,7 @@ tasks to the root registry and then manually applies the &lt;code&gt;register&lt
 
 &lt;p&gt;Finally, the plugin registry has to be created. We pass a &lt;code&gt;name&lt;/code&gt; parameter to the &lt;code&gt;__init__&lt;/code&gt; method in order to
 identify the plugin when logging and then create the register decorator. Since the class is unaware of celery, this
-only registers the task in the plugin task registry to later be registered whith the root registry (as evident by the
+only registers the task in the plugin task registry to later be registered with the root registry (as evident by the
 &lt;code&gt;Callable&lt;/code&gt; in the inherited class).&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt; &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;PluginTaskRegistry&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;_TaskRegistryBase&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;Callable&lt;/span&gt;&lt;span class="p"&gt;]):&lt;/span&gt;  
     &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;       &lt;/span&gt;

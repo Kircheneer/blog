@@ -40,13 +40,13 @@
     <meta name="msapplication-TileColor" content="#333">
 
 <meta name="author" content="kirchnerl" />
-<meta name="description" content="You can find the the code used in this post here. If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository. This is a follow-up to my earlier blog postNetbox webhook receiver with Python, Celery and FastAPI. Here we …" />
+<meta name="description" content="You can find the the code used in this post here. If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository. This is a follow-up to my earlier blog post Netbox webhook receiver with Python, Celery and FastAPI. Here we …" />
 <meta name="keywords" content="Celery, FastAPI, Netbox, Python">
 
 
 <meta property="og:site_name" content="Kirchnered Networking"/>
 <meta property="og:title" content="Improvements to the Netbox webhook receiver"/>
-<meta property="og:description" content="You can find the the code used in this post here. If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository. This is a follow-up to my earlier blog postNetbox webhook receiver with Python, Celery and FastAPI. Here we …"/>
+<meta property="og:description" content="You can find the the code used in this post here. If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository. This is a follow-up to my earlier blog post Netbox webhook receiver with Python, Celery and FastAPI. Here we …"/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:url" content="https://kircheneer.github.io/blog/improvements-to-the-netbox-webhook-receiver.html"/>
 <meta property="og:type" content="article"/>
@@ -119,7 +119,7 @@
   <div>
     <p><em>You can find the the code used in this post <a href="https://github.com/Kircheneer/webhook_receiver/tree/v0.1.0">here</a>.
 If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository.</em></p>
-<p>This is a follow-up to my earlier blog post<a href="https://blog.kirchne.red/programming/netbox-webhook-receiver-with-python-celery-and-fastapi/">Netbox webhook receiver with Python, Celery and FastAPI</a>.
+<p>This is a follow-up to my earlier blog post <a href="https://blog.kirchne.red/programming/netbox-webhook-receiver-with-python-celery-and-fastapi/">Netbox webhook receiver with Python, Celery and FastAPI</a>.
 Here we see two major improvements over the previous iteration:</p>
 <ul>
 <li>Consolidating webhook configuration on the <a href="https://github.com/netbox-community/netbox">Netbox</a>
@@ -269,7 +269,7 @@ tasks to the root registry and then manually applies the <code>register</code> d
 
 <p>Finally, the plugin registry has to be created. We pass a <code>name</code> parameter to the <code>__init__</code> method in order to
 identify the plugin when logging and then create the register decorator. Since the class is unaware of celery, this
-only registers the task in the plugin task registry to later be registered whith the root registry (as evident by the
+only registers the task in the plugin task registry to later be registered with the root registry (as evident by the
 <code>Callable</code> in the inherited class).</p>
 <div class="highlight"><pre><span></span><code> <span class="k">class</span> <span class="nc">PluginTaskRegistry</span><span class="p">(</span><span class="n">_TaskRegistryBase</span><span class="p">[</span><span class="n">Callable</span><span class="p">]):</span>  
     <span class="sd">&quot;&quot;&quot;       </span>
