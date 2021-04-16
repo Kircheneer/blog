@@ -17,17 +17,17 @@ THEME = "Flex"
 LINKS = ()
 SOCIAL = (
     ("github", "https://github.com/Kircheneer"),
-    ("rss", "/blog/feeds/all.atom.xml"),
+    ("rss", "/feeds/all.atom.xml"),
 )
 DEFAULT_PAGINATION = 10
-FAVICON = "/blog/images/favicon.ico"
-SITELOGO = SITEURL + "/blog/images/profile.png"
+FAVICON = "/images/favicon.ico"
+SITELOGO = SITEURL + "/images/profile.png"
 MAIN_MENU = True
 HOME_HIDE_TAGS = True
 MENUITEMS = (
-    ("Archives", "/blog/archives.html"),
-    ("Categories", "/blog/categories.html"),
-    ("Tags", "/blog/tags.html"),
+    ("Archives", "/archives.html"),
+    ("Categories", "/categories.html"),
+    ("Tags", "/tags.html"),
 )
 BROWSER_COLOR = "#333"
 RELATIVE_URLS = False
