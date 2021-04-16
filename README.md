@@ -1,13 +1,13 @@
 # Blog
 
-Personal blog.
+Personal blog at https://blog.kirchne.red.
 
-Publish using
+Built using [Pelican](https://github.com/getpelican/pelican/) and the [Flex](https://github.com/alexandrevicenzi/Flex) theme.
+
+## Updating
 
 ```bash
 $ cd site
 $ pelican content -o output -s publishconf.py
 $ ghp-import output && git push origin gh-pages
 ```
-
-A post-commit hook is configured.
