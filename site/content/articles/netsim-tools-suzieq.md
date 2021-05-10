@@ -4,7 +4,7 @@ Author: kirchnerl
 Category: Networking
 Tags: suzieq, docker, ansible, vagrant, libvirt
 Slug: using-suzieq-with-netsim-tools
-Status: darft
+Status: published
 
 The following two tools had been on my "check-this-out" list for a couple
 of weeks now:
@@ -34,16 +34,16 @@ started my foray into the project by contributing a little
 that installs the project and its dependencies to a Ubuntu machine
 because I try to keep my testing VMs as cattle in regards to the
 "Pets vs. Cattle" analogy. You can use this playbook to install all of
-the dependencies to use the tools (tested on a Ubuntu 20.04 VM).
-Furthermore, you can customize the install location as follows:
+the dependencies to use the tools on a Ubuntu system (shamelessly stolen
+from the [docs](https://netsim-tools.readthedocs.io/en/latest/index.html)).
 
 ```bash
-$ ansible-playbook install.libvirt --ask-become -e clone_to=/some/dir
+$ wget https://raw.githubusercontent.com/ipspace/netsim-tools/master/install.libvirt https://raw.githubusercontent.com/ipspace/netsim-tools/master/requirements.yml
+$ ansible-playbook install.libvirt --ask-become -e /opt/netsim-tools
 ```
 
-*Note: If you're having any trouble with the installation make sure
-to also check out the [docs](https://netsim-tools.readthedocs.io/en/latest/index.html)
-(which is always a good idea anyway).*
+This default to installing to `/opt/netsim-tools` although that can be
+customized.
 
 ## Overview of netsim-tools
 
@@ -63,10 +63,17 @@ on their web sites. Take a look at Ethan Banks blog post on this topic
 [here](https://ethancbanks.com/free-networking-lab-images-from-arista-cisco-nvidia-cumulus/).
 He explains where to find free networking lab images.
 
-My examples will use the NXOS 9000v for which
-you can download a Virtualbox based Vagrant box. In order to use that
-box with Vagrant and Ivan's tools you have to convert the box to the
-libvirt provider with `https://github.com/sciurus/vagrant-mutate`.
+My examples will use the NXOS 9000v for which you can
+[download](https://software.cisco.com/download/home/286312239/type/282088129/release/9.3(7))
+a Virtualbox based Vagrant box. In order to use that box with Vagrant
+and Ivan's tools you have to convert the box to the libvirt provider with
+`https://github.com/sciurus/vagrant-mutate`:
+
+```bash
+$ vagrant mutate file:///path/to/vagrant.box libvirt
+```
+
+You can now add the ready-to-use box.
 
 ## Using netsim-tools
 
@@ -109,7 +116,7 @@ Created Ansible configuration file: ansible.cfg
 ```
 
 The subsequent `vagrant up` creates all the machines in the topology
-with the appropriate links. This takes a couple of minutes on my setup;
+with the appropriate links. This takes a couple of minutes on my setup -
 your mileage may vary.
 
 ## Debugging Vagrant / libvirt / vendor issues
@@ -123,7 +130,7 @@ following steps to debug the installation process:
 I had one central problem which I found using this process:
 
 Neither NXOS nor Junos liked my setup with a Ubuntu VM using an AMD
-CPU. I had to set `domain.cpu_mode = "custom"` on most VMs which sets
+CPU. I had to set `domain.cpu_mode = "custom"` which sets
 the `--cpu qemu64` flag for the qemu command that runs the VM. This
 hinders performance but made all the machines run fine. This lead to
 issues where the Junos machine wouldn't boot at all or the NXOS
