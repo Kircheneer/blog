@@ -7,7 +7,7 @@ Slug: netsim-tools-quickstart
 Status: published
 
 The somewhat newly released [netsim-tools](https://github.com/ipspace/netsim-tools)
-by Ivan Pepelnjak has been on my "check-this-out" list for a couple of weeks
+by [Ivan Pepelnjak](https://www.ipspace.net/Main_Page) has been on my "check-this-out" list for a couple of weeks
 now. It contains a set of tools to simplify the process of creating virtual network
 labs. In this blog post I describe how to quickly get started using it
 based off of my own experiences.
@@ -22,9 +22,8 @@ annoyed having to set up the same basic configuration everytime:
 1. IP addresses on links between the devices
 1. Routing protocols
 
-[Ivan Pepelnjak](https://www.ipspace.net/Main_Page) probably thought
-something along those lines as well when he created netsim-tools. I
-started my foray into the project by contributing a little
+Ivan probably thought something along those lines as well when he created netsim-tools.
+I started my foray into the project by contributing a little
 [Ansible playbook](https://github.com/ipspace/netsim-tools/blob/master/install.libvirt)
 that installs the project and its dependencies to a Ubuntu machine
 because I try to keep my testing VMs as cattle in regards to the
