@@ -50,13 +50,13 @@
     <meta name="msapplication-TileColor" content="#333">
 
 <meta name="author" content="kirchnerl" />
-<meta name="description" content="The somewhat newly released netsim-tools by Ivan Pepelnjak has been on my &#34;check-this-out&#34; list for a couple of weeks now. It contains a set of tools to simplify the process of creating virtual network labs. In this blog post I describe how to quickly get started using it based off …" />
+<meta name="description" content="The somewhat newly released netsim-tools by Ivan Pepelnjak has been on my &#34;check-this-out&#34; list for a couple of weeks now. It contains a set of tools to simplify the process of creating virtual network labs. In the following sections I will lay out how to quickly get started with labbing …" />
 <meta name="keywords" content="ansible, vagrant, libvirt, cisco, linux">
 
 
 <meta property="og:site_name" content="Kirchnered Networking"/>
 <meta property="og:title" content="A quick introduction to netsim-tools"/>
-<meta property="og:description" content="The somewhat newly released netsim-tools by Ivan Pepelnjak has been on my &#34;check-this-out&#34; list for a couple of weeks now. It contains a set of tools to simplify the process of creating virtual network labs. In this blog post I describe how to quickly get started using it based off …"/>
+<meta property="og:description" content="The somewhat newly released netsim-tools by Ivan Pepelnjak has been on my &#34;check-this-out&#34; list for a couple of weeks now. It contains a set of tools to simplify the process of creating virtual network labs. In the following sections I will lay out how to quickly get started with labbing …"/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:url" content="https://kircheneer.github.io/blog/netsim-tools-quickstart.html"/>
 <meta property="og:type" content="article"/>
@@ -131,8 +131,8 @@
     <p>The somewhat newly released <a href="https://github.com/ipspace/netsim-tools">netsim-tools</a>
 by <a href="https://www.ipspace.net/Main_Page">Ivan Pepelnjak</a> has been on my "check-this-out" list for a couple of weeks
 now. It contains a set of tools to simplify the process of creating virtual network
-labs. In this blog post I describe how to quickly get started using it
-based off of my own experiences.</p>
+labs. In the following sections I will lay out how to quickly get started with
+labbing on Cisco NXOS 9000v devices using netsim-tools.</p>
 <h1>Virtualizing network devices</h1>
 <p>In the past I have mostly used <a href="https://gns3.com/">GNS3</a> for my virtual
 network labbing purposes. While this works quite well, I was a little
@@ -148,8 +148,6 @@ I started my foray into the project by contributing a little
 that installs the project and its dependencies to a Ubuntu machine
 because I try to keep my testing VMs as cattle in regards to the
 "Pets vs. Cattle" analogy.</p>
-<p>In the following sections I will lay out how to quickly get started with
-labbing on Cisco NXOS 9000v devices using netsim-tools.</p>
 <h2>Vagrantfile for netsim-tools</h2>
 <p>I'm using Vagrant for creating my development environment here. For the
 purposes of this blog post I will assume that you already have Vagrant

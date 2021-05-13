@@ -2,12 +2,12 @@
 <feed xmlns="http://www.w3.org/2005/Atom"><title>Kirchnered Networking - Networking</title><link href="https://kircheneer.github.io/blog/" rel="alternate"></link><link href="https://kircheneer.github.io/blog/feeds/networking.atom.xml" rel="self"></link><id>https://kircheneer.github.io/blog/</id><updated>2021-05-13T14:44:00+02:00</updated><subtitle>Network Engineer</subtitle><entry><title>A quick introduction to netsim-tools</title><link href="https://kircheneer.github.io/blog/netsim-tools-quickstart.html" rel="alternate"></link><published>2021-05-13T14:44:00+02:00</published><updated>2021-05-13T14:44:00+02:00</updated><author><name>kirchnerl</name></author><id>tag:kircheneer.github.io,2021-05-13:/blog/netsim-tools-quickstart.html</id><summary type="html">&lt;p&gt;The somewhat newly released &lt;a href="https://github.com/ipspace/netsim-tools"&gt;netsim-tools&lt;/a&gt;
 by &lt;a href="https://www.ipspace.net/Main_Page"&gt;Ivan Pepelnjak&lt;/a&gt; has been on my "check-this-out" list for a couple of weeks
 now. It contains a set of tools to simplify the process of creating virtual network
-labs. In this blog post I describe how to quickly get started using it
-based off …&lt;/p&gt;</summary><content type="html">&lt;p&gt;The somewhat newly released &lt;a href="https://github.com/ipspace/netsim-tools"&gt;netsim-tools&lt;/a&gt;
+labs. In the following sections I will lay out how to quickly get started with
+labbing …&lt;/p&gt;</summary><content type="html">&lt;p&gt;The somewhat newly released &lt;a href="https://github.com/ipspace/netsim-tools"&gt;netsim-tools&lt;/a&gt;
 by &lt;a href="https://www.ipspace.net/Main_Page"&gt;Ivan Pepelnjak&lt;/a&gt; has been on my "check-this-out" list for a couple of weeks
 now. It contains a set of tools to simplify the process of creating virtual network
-labs. In this blog post I describe how to quickly get started using it
-based off of my own experiences.&lt;/p&gt;
+labs. In the following sections I will lay out how to quickly get started with
+labbing on Cisco NXOS 9000v devices using netsim-tools.&lt;/p&gt;
 &lt;h1&gt;Virtualizing network devices&lt;/h1&gt;
 &lt;p&gt;In the past I have mostly used &lt;a href="https://gns3.com/"&gt;GNS3&lt;/a&gt; for my virtual
 network labbing purposes. While this works quite well, I was a little
@@ -23,8 +23,6 @@ I started my foray into the project by contributing a little
 that installs the project and its dependencies to a Ubuntu machine
 because I try to keep my testing VMs as cattle in regards to the
 "Pets vs. Cattle" analogy.&lt;/p&gt;
-&lt;p&gt;In the following sections I will lay out how to quickly get started with
-labbing on Cisco NXOS 9000v devices using netsim-tools.&lt;/p&gt;
 &lt;h2&gt;Vagrantfile for netsim-tools&lt;/h2&gt;
 &lt;p&gt;I'm using Vagrant for creating my development environment here. For the
 purposes of this blog post I will assume that you already have Vagrant
