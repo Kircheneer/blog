@@ -9,8 +9,8 @@ Status: published
 The somewhat newly released [netsim-tools](https://github.com/ipspace/netsim-tools)
 by [Ivan Pepelnjak](https://www.ipspace.net/Main_Page) has been on my "check-this-out" list for a couple of weeks
 now. It contains a set of tools to simplify the process of creating virtual network
-labs. In this blog post I describe how to quickly get started using it
-based off of my own experiences.
+labs. In the following sections I will lay out how to quickly get started with
+labbing on Cisco NXOS 9000v devices using netsim-tools.
 
 # Virtualizing network devices
 
@@ -29,8 +29,7 @@ that installs the project and its dependencies to a Ubuntu machine
 because I try to keep my testing VMs as cattle in regards to the
 "Pets vs. Cattle" analogy.
 
-In the following sections I will lay out how to quickly get started with
-labbing on Cisco NXOS 9000v devices using netsim-tools.
+
 
 ## Vagrantfile for netsim-tools
 
