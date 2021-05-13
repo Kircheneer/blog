@@ -1,5 +1,253 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kirchnered Networking - Networking</title><link href="https://kircheneer.github.io/blog/" rel="alternate"></link><link href="https://kircheneer.github.io/blog/feeds/networking.atom.xml" rel="self"></link><id>https://kircheneer.github.io/blog/</id><updated>2020-11-23T19:49:00+01:00</updated><subtitle>Network Engineer</subtitle><entry><title>Docker alongside GNS3 on a Windows / AMD system</title><link href="https://kircheneer.github.io/blog/docker-alongside-gns3-on-a-windows-amd-system.html" rel="alternate"></link><published>2020-11-23T19:49:00+01:00</published><updated>2020-11-23T19:49:00+01:00</updated><author><name>kirchnerl</name></author><id>tag:kircheneer.github.io,2020-11-23:/blog/docker-alongside-gns3-on-a-windows-amd-system.html</id><summary type="html">&lt;p&gt;When trying to run &lt;a href="https://www.docker.com/"&gt;Docker&lt;/a&gt; and &lt;a href="https://gns3.com/"&gt;GNS3&lt;/a&gt; on the same Windows system with an
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kirchnered Networking - Networking</title><link href="https://kircheneer.github.io/blog/" rel="alternate"></link><link href="https://kircheneer.github.io/blog/feeds/networking.atom.xml" rel="self"></link><id>https://kircheneer.github.io/blog/</id><updated>2021-05-13T14:44:00+02:00</updated><subtitle>Network Engineer</subtitle><entry><title>A quick introduction to netsim-tools</title><link href="https://kircheneer.github.io/blog/netsim-tools-quickstart.html" rel="alternate"></link><published>2021-05-13T14:44:00+02:00</published><updated>2021-05-13T14:44:00+02:00</updated><author><name>kirchnerl</name></author><id>tag:kircheneer.github.io,2021-05-13:/blog/netsim-tools-quickstart.html</id><summary type="html">&lt;p&gt;The somewhat newly released &lt;a href="https://github.com/ipspace/netsim-tools"&gt;netsim-tools&lt;/a&gt;
+by Ivan Pepelnjak has been on my "check-this-out" list for a couple of weeks
+now. It contains a set of tools to simplify the process of creating virtual network
+labs. In this blog post I describe how to quickly get started using it
+based off …&lt;/p&gt;</summary><content type="html">&lt;p&gt;The somewhat newly released &lt;a href="https://github.com/ipspace/netsim-tools"&gt;netsim-tools&lt;/a&gt;
+by Ivan Pepelnjak has been on my "check-this-out" list for a couple of weeks
+now. It contains a set of tools to simplify the process of creating virtual network
+labs. In this blog post I describe how to quickly get started using it
+based off of my own experiences.&lt;/p&gt;
+&lt;h1&gt;Virtualizing network devices&lt;/h1&gt;
+&lt;p&gt;In the past I have mostly used &lt;a href="https://gns3.com/"&gt;GNS3&lt;/a&gt; for my virtual
+network labbing purposes. While this works quite well, I was a little
+annoyed having to set up the same basic configuration everytime:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;SSH access&lt;/li&gt;
+&lt;li&gt;IP addresses on links between the devices&lt;/li&gt;
+&lt;li&gt;Routing protocols&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a href="https://www.ipspace.net/Main_Page"&gt;Ivan Pepelnjak&lt;/a&gt; probably thought
+something along those lines as well when he created netsim-tools. I
+started my foray into the project by contributing a little
+&lt;a href="https://github.com/ipspace/netsim-tools/blob/master/install.libvirt"&gt;Ansible playbook&lt;/a&gt;
+that installs the project and its dependencies to a Ubuntu machine
+because I try to keep my testing VMs as cattle in regards to the
+"Pets vs. Cattle" analogy.&lt;/p&gt;
+&lt;p&gt;In the following sections I will lay out how to quickly get started with
+labbing on Cisco NXOS 9000v devices using netsim-tools.&lt;/p&gt;
+&lt;h2&gt;Vagrantfile for netsim-tools&lt;/h2&gt;
+&lt;p&gt;I'm using Vagrant for creating my development environment here. For the
+purposes of this blog post I will assume that you already have Vagrant
+installed. Otherwise, just take a look at the
+&lt;a href="https://www.vagrantup.com/docs/installation"&gt;docs&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The first step will be creating a Vagrantfile for the test VM. I'm running
+Virtualbox as the Vagrant provider from a Windows 10 machine, but thanks
+to the power of Vagrant these instructions should work on any OS.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Note: A prerequisite is a host OS supporting nested virtualization, because
+we will be using KVM isnide of the Vagrant provisioned Ubuntu VM.&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# -*- mode: ruby -*-&lt;/span&gt;
+&lt;span class="c1"&gt;# vi: set ft=ruby :&lt;/span&gt;
+
+&lt;span class="no"&gt;Vagrant&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;configure&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;2&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;
+  &lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;vm&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;box&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;ubuntu/focal64&amp;quot;&lt;/span&gt;
+
+  &lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;vm&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;provider&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;virtualbox&amp;quot;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;vb&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;
+    &lt;span class="n"&gt;vb&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;memory&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;16384&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;vb&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cpus&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;
+    &lt;span class="n"&gt;vb&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;customize&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;modifyvm&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="ss"&gt;:id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;--nested-hw-virt&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;on&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;
+  &lt;span class="k"&gt;end&lt;/span&gt;
+
+  &lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;vm&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;provision&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;shell&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="ss"&gt;inline&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;-&lt;/span&gt;&lt;span class="dl"&gt;SHELL&lt;/span&gt;
+&lt;span class="sh"&gt;    apt-get update&lt;/span&gt;
+&lt;span class="sh"&gt;    apt-get install -y ansible&lt;/span&gt;
+&lt;span class="sh"&gt;    wget https://raw.githubusercontent.com/ipspace/netsim-tools/master/install.libvirt&lt;/span&gt;
+&lt;span class="sh"&gt;    ansible-playbook install.libvirt&lt;/span&gt;
+&lt;span class="sh"&gt;    usermod -aG libvirt vagrant&lt;/span&gt;
+&lt;span class="dl"&gt;  SHELL&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Make sure to adjust the &lt;code&gt;vb.memory&lt;/code&gt; and &lt;code&gt;vg.cpus&lt;/code&gt; settings to your needs.
+Virtualbox starts throwing warnings whenever you have a VM consuming
+&gt;=75% of the hypervisor hosts memory capacity.&lt;/p&gt;
+&lt;p&gt;Place this file in a directory on your host OS and then run &lt;code&gt;vagrant up&lt;/code&gt;.
+This will do the following things (and therefore might take a little while):&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Download and boot a Ubuntu 20.04 Vagrant box&lt;/li&gt;
+&lt;li&gt;Enable nested virtualization in the Virtualbox settings of the VM&lt;/li&gt;
+&lt;li&gt;Install A inside of the box&lt;/li&gt;
+&lt;li&gt;Use Vagrant provisioning to install netsim-tools to /opt/netsim-tools &lt;/li&gt;
+&lt;li&gt;Change the owner of /opt/netsim-tools to the vagrant user&lt;/li&gt;
+&lt;li&gt;Add the vagrant user to the libvirt group&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The output of the Ansible playbook should be echoed to the shell running
+&lt;code&gt;vagrant up&lt;/code&gt; so if there are any issues during the provisioning you should
+be able to leverage that as debugging information.&lt;/p&gt;
+&lt;p&gt;Once the machine successfully comes up, you can SSH into it with
+&lt;code&gt;vagrant ssh&lt;/code&gt;. All subsequent command line excerpts are from the VM.&lt;/p&gt;
+&lt;h2&gt;Readying the NXOS 9000v box for use with netsim-tools&lt;/h2&gt;
+&lt;p&gt;Netsim-tools provides tools to perform the following tasks:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Automate file creation based on a simple topology file for&lt;ul&gt;
+&lt;li&gt;Vagrantfile&lt;/li&gt;
+&lt;li&gt;Ansible inventory&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Deploy initial configuration with various optional features (e.g.
+  basic routing protocol configuration) using Ansible&lt;/li&gt;
+&lt;li&gt;Various other utilities for configuration management&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Unfortunately, you still have to put in a little leg work yourself to
+get the VMs from the vendors. Juniper, Cisco and Arista for example
+all allow for downloads of virtual appliances, but only once you sign up
+on their web sites. Take a look at Ethan Banks blog post on this topic
+&lt;a href="https://ethancbanks.com/free-networking-lab-images-from-arista-cisco-nvidia-cumulus/"&gt;here&lt;/a&gt;.
+He explains where to find free networking lab images. In the coming steps
+I will assume that you have downloaded a copy of a NXOS 9000v Vagrant box
+and put that file into the directory containing the Vagrantfile of the
+Ubuntu VM (Vagrant automatically syncs that directory to &lt;code&gt;/vagrant&lt;/code&gt; in the
+guest operating system).&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Note: While netsim-tools supports a Virtualbox backend for some of the VMs
+(including the NXOS 9000v) I will, for the purposes of this blog post,
+be using a libvirt backend.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;In order to use that box with Vagrant and Ivan's tools you have to convert
+the downloaded box to the libvirt provider with
+&lt;code&gt;https://github.com/sciurus/vagrant-mutate&lt;/code&gt; and repackage it with the correct
+version and name for netsim-tools to pick up. Don't worry if the mutate command
+takes a while - it has to copy the contents of the entire box file at some point.
+The &lt;code&gt;mv&lt;/code&gt; command is used to rename the box to the name at which netsim-tools
+expects the box to be.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Note: You can skip the step of copying into &lt;code&gt;/tmp&lt;/code&gt; and have &lt;code&gt;vagrant mutate&lt;/code&gt; read from
+&lt;code&gt;/vagrant&lt;/code&gt; directly - I opted not to do this because my &lt;code&gt;vagrant mutate&lt;/code&gt; command
+always seemed to stall out at 99% when reading diretly from the shared folder.&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ls /vagrant
+nexus9300v.9.3.7.box
+$ vagrant plugin install vagrant-mutate
+$ cp /vagrant/nexus9300v.9.3.7.box /tmp
+$ vagrant mutate file:///tmp/nexus9300v.9.3.7.box libvirt
+$ mv ~/.vagrant.d/boxes/nexus9300v.9.3.7/ ~/.vagrant.d/boxes/cisco-VAGRANTSLASH-nexus9300v
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;At this point you could start using the box manually, but we will be
+leveraging netsim-tools to do most of the hard lifting for us.&lt;/p&gt;
+&lt;h2&gt;Using netsim-tools&lt;/h2&gt;
+&lt;p&gt;Netsim-tools uses a YAML files to describe topologies. These include
+the actual nodes to be provisioned, links between the nodes,
+any modules to be deployed onto the nodes and finally configuration
+for those modules.&lt;/p&gt;
+&lt;p&gt;Copy the content of the following topology file into
+&lt;code&gt;/opt/netsim-tools/topology.yml&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;module&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p p-Indicator"&gt;[&lt;/span&gt; &lt;span class="nv"&gt;bgp&lt;/span&gt;&lt;span class="p p-Indicator"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;ospf&lt;/span&gt; &lt;span class="p p-Indicator"&gt;]&lt;/span&gt;
+
+&lt;span class="nt"&gt;bgp&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="nt"&gt;as&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;65000&lt;/span&gt;
+&lt;span class="nt"&gt;ospf&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="nt"&gt;area&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;0.0.0.0&lt;/span&gt;
+&lt;span class="nt"&gt;defaults&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="nt"&gt;device&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;nxos&lt;/span&gt;
+&lt;span class="nt"&gt;nodes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;r1&lt;/span&gt;
+  &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;r2&lt;/span&gt;
+&lt;span class="nt"&gt;links&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;r1-r2&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This describes two connected Cisco NXOS with basic OSPF config to ensure
+loopback interface reachability in order for a BGP session to be
+established over those loopback interfaces.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;create-toplogy&lt;/code&gt; python script defaults to &lt;code&gt;./topology.yml&lt;/code&gt; as the
+input and generates the following files as its output:
+- Vagrantfile
+- hosts.yml (Ansible inventory)
+- ansible.cfg&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nb"&gt;cd&lt;/span&gt; /opt/netsim-tools
+$ &lt;span class="nb"&gt;source&lt;/span&gt; venv/bin/activate
+$ ./create-topology -g -i -c
+Created provider configuration file: Vagrantfile
+Created group_vars &lt;span class="k"&gt;for&lt;/span&gt; nxos
+Created host_vars &lt;span class="k"&gt;for&lt;/span&gt; r1
+Created host_vars &lt;span class="k"&gt;for&lt;/span&gt; r2
+Created minimized Ansible inventory hosts.yml
+Created Ansible configuration file: ansible.cfg
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Make sure to take a look into the generated Vagrantfile. All the configuration
+we entered manually when we instantiated the Ubuntu VM we are currently
+operating in have been auto-generated for us by netsim-tools.&lt;/p&gt;
+&lt;p&gt;A subsequent &lt;code&gt;vagrant up&lt;/code&gt; creates all the machines in the topology
+with the appropriate links. This takes a couple of minutes on my setup;
+your mileage may vary.&lt;/p&gt;
+&lt;h2&gt;Debugging Vagrant / libvirt / vendor issues&lt;/h2&gt;
+&lt;p&gt;If you experience any issues during &lt;code&gt;vagrant up&lt;/code&gt;, you can use the
+following steps to debug the installation process:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;List all the virtual machines created with libvirt with &lt;code&gt;virsh list&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Console into any failing devices with &lt;code&gt;virsh console netsim-tools_r1&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I had one central problem which I found using this process:&lt;/p&gt;
+&lt;p&gt;Neither NXOS nor Junos liked my setup with a Ubuntu VM using an AMD
+CPU. This lead to issues where the Junos machine wouldn't boot at
+all or the NXOS machine was unable to save its running configuration
+to the startup configuration.I had to set &lt;code&gt;domain.cpu_mode = "custom"&lt;/code&gt;
+on most VMs which sets the &lt;code&gt;--cpu qemu64&lt;/code&gt; flag for the qemu command
+that runs the VM. This hinders performance but made all the machines
+run fine.  With release 0.6.2 of netsim-tools this should be resolved,
+as the &lt;code&gt;cpu_mode&lt;/code&gt; parameter is automatically set to &lt;code&gt;custom&lt;/code&gt;whenever
+an AMD CPU is used.&lt;/p&gt;
+&lt;h2&gt;Using Ansible with netsim-tools&lt;/h2&gt;
+&lt;p&gt;After your VMs are all set up you can use Ansible to deploy the initial
+configuration (including BGP and OSPF) to the virtual machines. We also
+install Ansible and the paramiko dependency for the NXOS Ansible modules
+into the virtual Python environment so we don't have to switch between
+the virtual environment and the system Python interpreter all the time.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nb"&gt;cd&lt;/span&gt; /opt/netsim-tools
+$ &lt;span class="nb"&gt;source&lt;/span&gt; venv/bin/activate
+$ pip install ansible paramiko
+$ ansible-playbook initial-config.ansible -k
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Once that's done you can SSH into one of the machines and take a look
+at the routing protocol state:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ vagrant ssh r1
+&lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;
+r1# sh ip ospf neighbors
+ OSPF Process ID &lt;span class="m"&gt;1&lt;/span&gt; VRF default
+ Total number of neighbors: &lt;span class="m"&gt;1&lt;/span&gt;
+ Neighbor ID     Pri State            Up Time  Address         Interface
+ &lt;span class="m"&gt;10&lt;/span&gt;.0.0.2          &lt;span class="m"&gt;1&lt;/span&gt; FULL/ -          &lt;span class="m"&gt;00&lt;/span&gt;:00:08 &lt;span class="m"&gt;10&lt;/span&gt;.1.0.2        Eth1/1
+r1# sh ip bgp neighbors &lt;span class="p"&gt;|&lt;/span&gt; i &lt;span class="s2"&gt;&amp;quot;neighbor is&amp;quot;&lt;/span&gt;
+BGP neighbor is &lt;span class="m"&gt;10&lt;/span&gt;.0.0.2, remote AS &lt;span class="m"&gt;65000&lt;/span&gt;, ibgp link, Peer index &lt;span class="m"&gt;3&lt;/span&gt;
+r1# sh ip route
+IP Route Table &lt;span class="k"&gt;for&lt;/span&gt; VRF &lt;span class="s2"&gt;&amp;quot;default&amp;quot;&lt;/span&gt;
+&lt;span class="s1"&gt;&amp;#39;*&amp;#39;&lt;/span&gt; denotes best ucast next-hop
+&lt;span class="s1"&gt;&amp;#39;**&amp;#39;&lt;/span&gt; denotes best mcast next-hop
+&lt;span class="s1"&gt;&amp;#39;[x/y]&amp;#39;&lt;/span&gt; denotes &lt;span class="o"&gt;[&lt;/span&gt;preference/metric&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;span class="s1"&gt;&amp;#39;%&amp;lt;string&amp;gt;&amp;#39;&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; via output denotes VRF &amp;lt;string&amp;gt;
+
+&lt;span class="m"&gt;10&lt;/span&gt;.0.0.1/32, ubest/mbest: &lt;span class="m"&gt;2&lt;/span&gt;/0, attached
+    *via &lt;span class="m"&gt;10&lt;/span&gt;.0.0.1, Lo0, &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/0&lt;span class="o"&gt;]&lt;/span&gt;, &lt;span class="m"&gt;00&lt;/span&gt;:01:25, &lt;span class="nb"&gt;local&lt;/span&gt;
+    *via &lt;span class="m"&gt;10&lt;/span&gt;.0.0.1, Lo0, &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/0&lt;span class="o"&gt;]&lt;/span&gt;, &lt;span class="m"&gt;00&lt;/span&gt;:01:25, direct
+&lt;span class="m"&gt;10&lt;/span&gt;.0.0.2/32, ubest/mbest: &lt;span class="m"&gt;1&lt;/span&gt;/0
+    *via &lt;span class="m"&gt;10&lt;/span&gt;.1.0.2, Eth1/1, &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;110&lt;/span&gt;/41&lt;span class="o"&gt;]&lt;/span&gt;, &lt;span class="m"&gt;00&lt;/span&gt;:00:58, ospf-1, intra
+&lt;span class="m"&gt;10&lt;/span&gt;.1.0.0/30, ubest/mbest: &lt;span class="m"&gt;1&lt;/span&gt;/0, attached
+    *via &lt;span class="m"&gt;10&lt;/span&gt;.1.0.1, Eth1/1, &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/0&lt;span class="o"&gt;]&lt;/span&gt;, &lt;span class="m"&gt;00&lt;/span&gt;:01:23, direct
+&lt;span class="m"&gt;10&lt;/span&gt;.1.0.1/32, ubest/mbest: &lt;span class="m"&gt;1&lt;/span&gt;/0, attached
+    *via &lt;span class="m"&gt;10&lt;/span&gt;.1.0.1, Eth1/1, &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/0&lt;span class="o"&gt;]&lt;/span&gt;, &lt;span class="m"&gt;00&lt;/span&gt;:01:23, &lt;span class="nb"&gt;local&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;As you can see at this point the routing protocol neighborships
+have been successfully established.&lt;/p&gt;
+&lt;p&gt;Apart from deploying pre-baked initial configurations we can also use the
+&lt;code&gt;config.ansible&lt;/code&gt; playbook to deploy our own custom configuration templates
+to the devices as follows:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;no feature telnet&amp;quot;&lt;/span&gt; &amp;gt; config.j2
+$ ansible-playbook config.ansible -e &lt;span class="nv"&gt;config&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;config
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You can of course get more complex with those templates rather than merely
+disabling telnet.&lt;/p&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;In this blog post I demonstrated how to use Vagrant, netsim-tools and Linux
+to build a virtual network lab. I personally feel like the instant Ansible
+integration and batteries-includedness regarding boilerplate routing protocol
+configuration are useful enough for me to forgive the lack of a shiny graphical
+user interface guiding me through the process. Finally, I'd like to thank Ivan
+Pepelnjak for his patience in accepting my many pull requests over the course
+of my exploration into the world of netsim-tools.&lt;/p&gt;
+&lt;p&gt;If you want to find out more about netsim-tools, make sure to visit Ivan's
+&lt;a href="https://duckduckgo.com/?q=netsim-tools&amp;amp;sites=ipspace.net"&gt;blog&lt;/a&gt; about it. Thanks
+for reading!&lt;/p&gt;</content><category term="Networking"></category><category term="ansible"></category><category term="vagrant"></category><category term="libvirt"></category><category term="cisco"></category><category term="linux"></category></entry><entry><title>Docker alongside GNS3 on a Windows / AMD system</title><link href="https://kircheneer.github.io/blog/docker-alongside-gns3-on-a-windows-amd-system.html" rel="alternate"></link><published>2020-11-23T19:49:00+01:00</published><updated>2020-11-23T19:49:00+01:00</updated><author><name>kirchnerl</name></author><id>tag:kircheneer.github.io,2020-11-23:/blog/docker-alongside-gns3-on-a-windows-amd-system.html</id><summary type="html">&lt;p&gt;When trying to run &lt;a href="https://www.docker.com/"&gt;Docker&lt;/a&gt; and &lt;a href="https://gns3.com/"&gt;GNS3&lt;/a&gt; on the same Windows system with an
 AMD processor I was faced with the following challenges:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://docs.docker.com/docker-for-windows/install/"&gt;Docker for Desktop&lt;/a&gt; on Windows requires Hyper-V or WSL2,

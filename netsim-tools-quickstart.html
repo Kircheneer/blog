@@ -1,0 +1,416 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/stylesheet/style.min.css">
+
+
+    <link id="pygments-light-theme" rel="stylesheet" type="text/css"
+          href="https://kircheneer.github.io/blog/theme/pygments/github.min.css">
+
+
+  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/solid.css">
+
+
+    <link href="https://kircheneer.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
+
+
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-183762699-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#333">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#333">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#333">
+
+<meta name="author" content="kirchnerl" />
+<meta name="description" content="The somewhat newly released netsim-tools by Ivan Pepelnjak has been on my &#34;check-this-out&#34; list for a couple of weeks now. It contains a set of tools to simplify the process of creating virtual network labs. In this blog post I describe how to quickly get started using it based off …" />
+<meta name="keywords" content="ansible, vagrant, libvirt, cisco, linux">
+
+
+<meta property="og:site_name" content="Kirchnered Networking"/>
+<meta property="og:title" content="A quick introduction to netsim-tools"/>
+<meta property="og:description" content="The somewhat newly released netsim-tools by Ivan Pepelnjak has been on my &#34;check-this-out&#34; list for a couple of weeks now. It contains a set of tools to simplify the process of creating virtual network labs. In this blog post I describe how to quickly get started using it based off …"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="https://kircheneer.github.io/blog/netsim-tools-quickstart.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2021-05-13 14:44:00+02:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://kircheneer.github.io/blog/author/kirchnerl.html">
+<meta property="article:section" content="Networking"/>
+<meta property="article:tag" content="ansible"/>
+<meta property="article:tag" content="vagrant"/>
+<meta property="article:tag" content="libvirt"/>
+<meta property="article:tag" content="cisco"/>
+<meta property="article:tag" content="linux"/>
+<meta property="og:image" content="/images/profile.png">
+
+  <title>Kirchnered Networking &ndash; A quick introduction to netsim-tools</title>
+
+</head>
+<body class="light-theme">
+  <aside>
+    <div>
+      <a href="https://kircheneer.github.io/blog">
+        <img src="/images/profile.png" alt="Kirchnered Networking" title="Kirchnered Networking">
+      </a>
+
+      <h1>
+        <a href="https://kircheneer.github.io/blog">Kirchnered Networking</a>
+      </h1>
+
+<p>Network Engineer</p>
+
+
+      <ul class="social">
+          <li>
+            <a  class="sc-github" href="https://github.com/Kircheneer" target="_blank">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+          <li>
+            <a  class="sc-rss" href="/feeds/all.atom.xml" target="_blank">
+              <i class="fas fa-rss"></i>
+            </a>
+          </li>
+      </ul>
+    </div>
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://kircheneer.github.io/blog">Home</a>
+
+      <a href="/archives.html">Archives</a>
+      <a href="/categories.html">Categories</a>
+      <a href="/tags.html">Tags</a>
+
+      <a href="https://kircheneer.github.io/blog/feeds/all.atom.xml">Atom</a>
+
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="netsim-tools-quickstart">A quick introduction to netsim-tools</h1>
+    <p>
+      Posted on Thu 13 May 2021 in <a href="https://kircheneer.github.io/blog/category/networking.html">Networking</a>
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>The somewhat newly released <a href="https://github.com/ipspace/netsim-tools">netsim-tools</a>
+by Ivan Pepelnjak has been on my "check-this-out" list for a couple of weeks
+now. It contains a set of tools to simplify the process of creating virtual network
+labs. In this blog post I describe how to quickly get started using it
+based off of my own experiences.</p>
+<h1>Virtualizing network devices</h1>
+<p>In the past I have mostly used <a href="https://gns3.com/">GNS3</a> for my virtual
+network labbing purposes. While this works quite well, I was a little
+annoyed having to set up the same basic configuration everytime:</p>
+<ol>
+<li>SSH access</li>
+<li>IP addresses on links between the devices</li>
+<li>Routing protocols</li>
+</ol>
+<p><a href="https://www.ipspace.net/Main_Page">Ivan Pepelnjak</a> probably thought
+something along those lines as well when he created netsim-tools. I
+started my foray into the project by contributing a little
+<a href="https://github.com/ipspace/netsim-tools/blob/master/install.libvirt">Ansible playbook</a>
+that installs the project and its dependencies to a Ubuntu machine
+because I try to keep my testing VMs as cattle in regards to the
+"Pets vs. Cattle" analogy.</p>
+<p>In the following sections I will lay out how to quickly get started with
+labbing on Cisco NXOS 9000v devices using netsim-tools.</p>
+<h2>Vagrantfile for netsim-tools</h2>
+<p>I'm using Vagrant for creating my development environment here. For the
+purposes of this blog post I will assume that you already have Vagrant
+installed. Otherwise, just take a look at the
+<a href="https://www.vagrantup.com/docs/installation">docs</a>.</p>
+<p>The first step will be creating a Vagrantfile for the test VM. I'm running
+Virtualbox as the Vagrant provider from a Windows 10 machine, but thanks
+to the power of Vagrant these instructions should work on any OS.</p>
+<p><em>Note: A prerequisite is a host OS supporting nested virtualization, because
+we will be using KVM isnide of the Vagrant provisioned Ubuntu VM.</em></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># -*- mode: ruby -*-</span>
+<span class="c1"># vi: set ft=ruby :</span>
+
+<span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;ubuntu/focal64&quot;</span>
+
+  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="s2">&quot;virtualbox&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">vb</span><span class="o">|</span>
+    <span class="n">vb</span><span class="o">.</span><span class="n">memory</span> <span class="o">=</span> <span class="s2">&quot;16384&quot;</span>
+    <span class="n">vb</span><span class="o">.</span><span class="n">cpus</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">vb</span><span class="o">.</span><span class="n">customize</span> <span class="o">[</span><span class="s1">&#39;modifyvm&#39;</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="s1">&#39;--nested-hw-virt&#39;</span><span class="p">,</span> <span class="s1">&#39;on&#39;</span><span class="o">]</span>
+  <span class="k">end</span>
+
+  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span> <span class="ss">inline</span><span class="p">:</span> <span class="o">&lt;&lt;-</span><span class="dl">SHELL</span>
+<span class="sh">    apt-get update</span>
+<span class="sh">    apt-get install -y ansible</span>
+<span class="sh">    wget https://raw.githubusercontent.com/ipspace/netsim-tools/master/install.libvirt</span>
+<span class="sh">    ansible-playbook install.libvirt</span>
+<span class="sh">    usermod -aG libvirt vagrant</span>
+<span class="dl">  SHELL</span>
+<span class="k">end</span>
+</code></pre></div>
+
+<p>Make sure to adjust the <code>vb.memory</code> and <code>vg.cpus</code> settings to your needs.
+Virtualbox starts throwing warnings whenever you have a VM consuming
+>=75% of the hypervisor hosts memory capacity.</p>
+<p>Place this file in a directory on your host OS and then run <code>vagrant up</code>.
+This will do the following things (and therefore might take a little while):</p>
+<ol>
+<li>Download and boot a Ubuntu 20.04 Vagrant box</li>
+<li>Enable nested virtualization in the Virtualbox settings of the VM</li>
+<li>Install A inside of the box</li>
+<li>Use Vagrant provisioning to install netsim-tools to /opt/netsim-tools </li>
+<li>Change the owner of /opt/netsim-tools to the vagrant user</li>
+<li>Add the vagrant user to the libvirt group</li>
+</ol>
+<p>The output of the Ansible playbook should be echoed to the shell running
+<code>vagrant up</code> so if there are any issues during the provisioning you should
+be able to leverage that as debugging information.</p>
+<p>Once the machine successfully comes up, you can SSH into it with
+<code>vagrant ssh</code>. All subsequent command line excerpts are from the VM.</p>
+<h2>Readying the NXOS 9000v box for use with netsim-tools</h2>
+<p>Netsim-tools provides tools to perform the following tasks:</p>
+<ul>
+<li>Automate file creation based on a simple topology file for<ul>
+<li>Vagrantfile</li>
+<li>Ansible inventory</li>
+</ul>
+</li>
+<li>Deploy initial configuration with various optional features (e.g.
+  basic routing protocol configuration) using Ansible</li>
+<li>Various other utilities for configuration management</li>
+</ul>
+<p>Unfortunately, you still have to put in a little leg work yourself to
+get the VMs from the vendors. Juniper, Cisco and Arista for example
+all allow for downloads of virtual appliances, but only once you sign up
+on their web sites. Take a look at Ethan Banks blog post on this topic
+<a href="https://ethancbanks.com/free-networking-lab-images-from-arista-cisco-nvidia-cumulus/">here</a>.
+He explains where to find free networking lab images. In the coming steps
+I will assume that you have downloaded a copy of a NXOS 9000v Vagrant box
+and put that file into the directory containing the Vagrantfile of the
+Ubuntu VM (Vagrant automatically syncs that directory to <code>/vagrant</code> in the
+guest operating system).</p>
+<p><em>Note: While netsim-tools supports a Virtualbox backend for some of the VMs
+(including the NXOS 9000v) I will, for the purposes of this blog post,
+be using a libvirt backend.</em></p>
+<p>In order to use that box with Vagrant and Ivan's tools you have to convert
+the downloaded box to the libvirt provider with
+<code>https://github.com/sciurus/vagrant-mutate</code> and repackage it with the correct
+version and name for netsim-tools to pick up. Don't worry if the mutate command
+takes a while - it has to copy the contents of the entire box file at some point.
+The <code>mv</code> command is used to rename the box to the name at which netsim-tools
+expects the box to be.</p>
+<p><em>Note: You can skip the step of copying into <code>/tmp</code> and have <code>vagrant mutate</code> read from
+<code>/vagrant</code> directly - I opted not to do this because my <code>vagrant mutate</code> command
+always seemed to stall out at 99% when reading diretly from the shared folder.</em></p>
+<div class="highlight"><pre><span></span><code>$ ls /vagrant
+nexus9300v.9.3.7.box
+$ vagrant plugin install vagrant-mutate
+$ cp /vagrant/nexus9300v.9.3.7.box /tmp
+$ vagrant mutate file:///tmp/nexus9300v.9.3.7.box libvirt
+$ mv ~/.vagrant.d/boxes/nexus9300v.9.3.7/ ~/.vagrant.d/boxes/cisco-VAGRANTSLASH-nexus9300v
+</code></pre></div>
+
+<p>At this point you could start using the box manually, but we will be
+leveraging netsim-tools to do most of the hard lifting for us.</p>
+<h2>Using netsim-tools</h2>
+<p>Netsim-tools uses a YAML files to describe topologies. These include
+the actual nodes to be provisioned, links between the nodes,
+any modules to be deployed onto the nodes and finally configuration
+for those modules.</p>
+<p>Copy the content of the following topology file into
+<code>/opt/netsim-tools/topology.yml</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">module</span><span class="p">:</span> <span class="p p-Indicator">[</span> <span class="nv">bgp</span><span class="p p-Indicator">,</span> <span class="nv">ospf</span> <span class="p p-Indicator">]</span>
+
+<span class="nt">bgp</span><span class="p">:</span>
+  <span class="nt">as</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">65000</span>
+<span class="nt">ospf</span><span class="p">:</span>
+  <span class="nt">area</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
+<span class="nt">defaults</span><span class="p">:</span>
+  <span class="nt">device</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">nxos</span>
+<span class="nt">nodes</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">r1</span>
+  <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">r2</span>
+<span class="nt">links</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">r1-r2</span>
+</code></pre></div>
+
+<p>This describes two connected Cisco NXOS with basic OSPF config to ensure
+loopback interface reachability in order for a BGP session to be
+established over those loopback interfaces.</p>
+<p>The <code>create-toplogy</code> python script defaults to <code>./topology.yml</code> as the
+input and generates the following files as its output:
+- Vagrantfile
+- hosts.yml (Ansible inventory)
+- ansible.cfg</p>
+<div class="highlight"><pre><span></span><code>$ <span class="nb">cd</span> /opt/netsim-tools
+$ <span class="nb">source</span> venv/bin/activate
+$ ./create-topology -g -i -c
+Created provider configuration file: Vagrantfile
+Created group_vars <span class="k">for</span> nxos
+Created host_vars <span class="k">for</span> r1
+Created host_vars <span class="k">for</span> r2
+Created minimized Ansible inventory hosts.yml
+Created Ansible configuration file: ansible.cfg
+</code></pre></div>
+
+<p>Make sure to take a look into the generated Vagrantfile. All the configuration
+we entered manually when we instantiated the Ubuntu VM we are currently
+operating in have been auto-generated for us by netsim-tools.</p>
+<p>A subsequent <code>vagrant up</code> creates all the machines in the topology
+with the appropriate links. This takes a couple of minutes on my setup;
+your mileage may vary.</p>
+<h2>Debugging Vagrant / libvirt / vendor issues</h2>
+<p>If you experience any issues during <code>vagrant up</code>, you can use the
+following steps to debug the installation process:</p>
+<ul>
+<li>List all the virtual machines created with libvirt with <code>virsh list</code></li>
+<li>Console into any failing devices with <code>virsh console netsim-tools_r1</code></li>
+</ul>
+<p>I had one central problem which I found using this process:</p>
+<p>Neither NXOS nor Junos liked my setup with a Ubuntu VM using an AMD
+CPU. This lead to issues where the Junos machine wouldn't boot at
+all or the NXOS machine was unable to save its running configuration
+to the startup configuration.I had to set <code>domain.cpu_mode = "custom"</code>
+on most VMs which sets the <code>--cpu qemu64</code> flag for the qemu command
+that runs the VM. This hinders performance but made all the machines
+run fine.  With release 0.6.2 of netsim-tools this should be resolved,
+as the <code>cpu_mode</code> parameter is automatically set to <code>custom</code>whenever
+an AMD CPU is used.</p>
+<h2>Using Ansible with netsim-tools</h2>
+<p>After your VMs are all set up you can use Ansible to deploy the initial
+configuration (including BGP and OSPF) to the virtual machines. We also
+install Ansible and the paramiko dependency for the NXOS Ansible modules
+into the virtual Python environment so we don't have to switch between
+the virtual environment and the system Python interpreter all the time.</p>
+<div class="highlight"><pre><span></span><code>$ <span class="nb">cd</span> /opt/netsim-tools
+$ <span class="nb">source</span> venv/bin/activate
+$ pip install ansible paramiko
+$ ansible-playbook initial-config.ansible -k
+</code></pre></div>
+
+<p>Once that's done you can SSH into one of the machines and take a look
+at the routing protocol state:</p>
+<div class="highlight"><pre><span></span><code>$ vagrant ssh r1
+<span class="o">[</span>...<span class="o">]</span>
+r1# sh ip ospf neighbors
+ OSPF Process ID <span class="m">1</span> VRF default
+ Total number of neighbors: <span class="m">1</span>
+ Neighbor ID     Pri State            Up Time  Address         Interface
+ <span class="m">10</span>.0.0.2          <span class="m">1</span> FULL/ -          <span class="m">00</span>:00:08 <span class="m">10</span>.1.0.2        Eth1/1
+r1# sh ip bgp neighbors <span class="p">|</span> i <span class="s2">&quot;neighbor is&quot;</span>
+BGP neighbor is <span class="m">10</span>.0.0.2, remote AS <span class="m">65000</span>, ibgp link, Peer index <span class="m">3</span>
+r1# sh ip route
+IP Route Table <span class="k">for</span> VRF <span class="s2">&quot;default&quot;</span>
+<span class="s1">&#39;*&#39;</span> denotes best ucast next-hop
+<span class="s1">&#39;**&#39;</span> denotes best mcast next-hop
+<span class="s1">&#39;[x/y]&#39;</span> denotes <span class="o">[</span>preference/metric<span class="o">]</span>
+<span class="s1">&#39;%&lt;string&gt;&#39;</span> <span class="k">in</span> via output denotes VRF &lt;string&gt;
+
+<span class="m">10</span>.0.0.1/32, ubest/mbest: <span class="m">2</span>/0, attached
+    *via <span class="m">10</span>.0.0.1, Lo0, <span class="o">[</span><span class="m">0</span>/0<span class="o">]</span>, <span class="m">00</span>:01:25, <span class="nb">local</span>
+    *via <span class="m">10</span>.0.0.1, Lo0, <span class="o">[</span><span class="m">0</span>/0<span class="o">]</span>, <span class="m">00</span>:01:25, direct
+<span class="m">10</span>.0.0.2/32, ubest/mbest: <span class="m">1</span>/0
+    *via <span class="m">10</span>.1.0.2, Eth1/1, <span class="o">[</span><span class="m">110</span>/41<span class="o">]</span>, <span class="m">00</span>:00:58, ospf-1, intra
+<span class="m">10</span>.1.0.0/30, ubest/mbest: <span class="m">1</span>/0, attached
+    *via <span class="m">10</span>.1.0.1, Eth1/1, <span class="o">[</span><span class="m">0</span>/0<span class="o">]</span>, <span class="m">00</span>:01:23, direct
+<span class="m">10</span>.1.0.1/32, ubest/mbest: <span class="m">1</span>/0, attached
+    *via <span class="m">10</span>.1.0.1, Eth1/1, <span class="o">[</span><span class="m">0</span>/0<span class="o">]</span>, <span class="m">00</span>:01:23, <span class="nb">local</span>
+</code></pre></div>
+
+<p>As you can see at this point the routing protocol neighborships
+have been successfully established.</p>
+<p>Apart from deploying pre-baked initial configurations we can also use the
+<code>config.ansible</code> playbook to deploy our own custom configuration templates
+to the devices as follows:</p>
+<div class="highlight"><pre><span></span><code>$ <span class="nb">echo</span> <span class="s2">&quot;no feature telnet&quot;</span> &gt; config.j2
+$ ansible-playbook config.ansible -e <span class="nv">config</span><span class="o">=</span>config
+</code></pre></div>
+
+<p>You can of course get more complex with those templates rather than merely
+disabling telnet.</p>
+<h2>Conclusion</h2>
+<p>In this blog post I demonstrated how to use Vagrant, netsim-tools and Linux
+to build a virtual network lab. I personally feel like the instant Ansible
+integration and batteries-includedness regarding boilerplate routing protocol
+configuration are useful enough for me to forgive the lack of a shiny graphical
+user interface guiding me through the process. Finally, I'd like to thank Ivan
+Pepelnjak for his patience in accepting my many pull requests over the course
+of my exploration into the world of netsim-tools.</p>
+<p>If you want to find out more about netsim-tools, make sure to visit Ivan's
+<a href="https://duckduckgo.com/?q=netsim-tools&amp;sites=ipspace.net">blog</a> about it. Thanks
+for reading!</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://kircheneer.github.io/blog/tag/ansible.html">ansible</a>
+      <a href="https://kircheneer.github.io/blog/tag/vagrant.html">vagrant</a>
+      <a href="https://kircheneer.github.io/blog/tag/libvirt.html">libvirt</a>
+      <a href="https://kircheneer.github.io/blog/tag/cisco.html">cisco</a>
+      <a href="https://kircheneer.github.io/blog/tag/linux.html">linux</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy; 2021 </p>
+<p>
+Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " Kirchnered Networking ",
+  "url" : "https://kircheneer.github.io/blog",
+  "image": "/images/profile.png",
+  "description": ""
+}
+</script>
+
+
+</body>
+</html>
