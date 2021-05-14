@@ -47,10 +47,12 @@ we will be using KVM isnide of the Vagrant provisioned Ubuntu VM.&lt;/em&gt;&lt;
 
   &lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;vm&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;provision&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;shell&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="ss"&gt;inline&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;-&lt;/span&gt;&lt;span class="dl"&gt;SHELL&lt;/span&gt;
 &lt;span class="sh"&gt;    apt-get update&lt;/span&gt;
-&lt;span class="sh"&gt;    apt-get install -y ansible&lt;/span&gt;
+&lt;span class="sh"&gt;    apt-get install -y ansible python3-pip&lt;/span&gt;
 &lt;span class="sh"&gt;    wget https://raw.githubusercontent.com/ipspace/netsim-tools/master/install.libvirt&lt;/span&gt;
 &lt;span class="sh"&gt;    ansible-playbook install.libvirt&lt;/span&gt;
 &lt;span class="sh"&gt;    usermod -aG libvirt vagrant&lt;/span&gt;
+&lt;span class="sh"&gt;    pip install -r /opt/netsim-tools/requirements.txt&lt;/span&gt;
+&lt;span class="sh"&gt;    pip install paramiko&lt;/span&gt;
 &lt;span class="dl"&gt;  SHELL&lt;/span&gt;
 &lt;span class="k"&gt;end&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -63,11 +65,16 @@ This will do the following things (and therefore might take a little while):&lt;
 &lt;ol&gt;
 &lt;li&gt;Download and boot a Ubuntu 20.04 Vagrant box&lt;/li&gt;
 &lt;li&gt;Enable nested virtualization in the Virtualbox settings of the VM&lt;/li&gt;
-&lt;li&gt;Install A inside of the box&lt;/li&gt;
+&lt;li&gt;Install Ansible inside of the box&lt;/li&gt;
 &lt;li&gt;Use Vagrant provisioning to install netsim-tools to /opt/netsim-tools &lt;/li&gt;
 &lt;li&gt;Change the owner of /opt/netsim-tools to the vagrant user&lt;/li&gt;
-&lt;li&gt;Add the vagrant user to the libvirt group&lt;/li&gt;
+&lt;li&gt;Add the vagrant user to the libvirt group so we can use libvirt without &lt;code&gt;sudo&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Install the dependencies of netsim-tools to the system Python interpreter&lt;/li&gt;
 &lt;/ol&gt;
+&lt;p&gt;&lt;em&gt;Note: We are using the system Python interpreter here instead of the
+virtual Python environment the netsim-tools install playbook creates.
+Normally, this would be a bad idea, but because this is a throwaway VM
+we can remove that complexity.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;The output of the Ansible playbook should be echoed to the shell running
 &lt;code&gt;vagrant up&lt;/code&gt; so if there are any issues during the provisioning you should
 be able to leverage that as debugging information.&lt;/p&gt;
@@ -116,8 +123,10 @@ $ vagrant mutate file:///tmp/nexus9300v.9.3.7.box libvirt
 $ mv ~/.vagrant.d/boxes/nexus9300v.9.3.7/ ~/.vagrant.d/boxes/cisco-VAGRANTSLASH-nexus9300v
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;At this point you could start using the box manually, but we will be
-leveraging netsim-tools to do most of the hard lifting for us.&lt;/p&gt;
+&lt;p&gt;At this point you could start using the box manually, but we will be leveraging
+netsim-tools to do most of the hard lifting for us. You might also want to copy
+the box folder &lt;code&gt;~/.vagrant.d/boxes/cisco-VAGRANTSLASH-nexus9300v&lt;/code&gt; back to
+&lt;code&gt;/vagrant&lt;/code&gt; in case you ever need to &lt;code&gt;vagrant destroy&lt;/code&gt; you Ubuntu VM.&lt;/p&gt;
 &lt;h2&gt;Using netsim-tools&lt;/h2&gt;
 &lt;p&gt;Netsim-tools uses a YAML files to describe topologies. These include
 the actual nodes to be provisioned, links between the nodes,
@@ -149,7 +158,6 @@ input and generates the following files as its output:
 - hosts.yml (Ansible inventory)
 - ansible.cfg&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nb"&gt;cd&lt;/span&gt; /opt/netsim-tools
-$ &lt;span class="nb"&gt;source&lt;/span&gt; venv/bin/activate
 $ ./create-topology -g -i -c
 Created provider configuration file: Vagrantfile
 Created group_vars &lt;span class="k"&gt;for&lt;/span&gt; nxos
@@ -189,8 +197,7 @@ install Ansible and the paramiko dependency for the NXOS Ansible modules
 into the virtual Python environment so we don't have to switch between
 the virtual environment and the system Python interpreter all the time.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nb"&gt;cd&lt;/span&gt; /opt/netsim-tools
-$ &lt;span class="nb"&gt;source&lt;/span&gt; venv/bin/activate
-$ pip install ansible paramiko
+$ deactivate  &lt;span class="c1"&gt;# Ensure deactivation of the virtual environment&lt;/span&gt;
 $ ansible-playbook initial-config.ansible --ssh-extra-args&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;-o &amp;quot;StrictHostKeyChecking=no&amp;quot;&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 

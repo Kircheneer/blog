@@ -172,10 +172,12 @@ we will be using KVM isnide of the Vagrant provisioned Ubuntu VM.</em></p>
 
   <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span> <span class="ss">inline</span><span class="p">:</span> <span class="o">&lt;&lt;-</span><span class="dl">SHELL</span>
 <span class="sh">    apt-get update</span>
-<span class="sh">    apt-get install -y ansible</span>
+<span class="sh">    apt-get install -y ansible python3-pip</span>
 <span class="sh">    wget https://raw.githubusercontent.com/ipspace/netsim-tools/master/install.libvirt</span>
 <span class="sh">    ansible-playbook install.libvirt</span>
 <span class="sh">    usermod -aG libvirt vagrant</span>
+<span class="sh">    pip install -r /opt/netsim-tools/requirements.txt</span>
+<span class="sh">    pip install paramiko</span>
 <span class="dl">  SHELL</span>
 <span class="k">end</span>
 </code></pre></div>
@@ -188,11 +190,16 @@ This will do the following things (and therefore might take a little while):</p>
 <ol>
 <li>Download and boot a Ubuntu 20.04 Vagrant box</li>
 <li>Enable nested virtualization in the Virtualbox settings of the VM</li>
-<li>Install A inside of the box</li>
+<li>Install Ansible inside of the box</li>
 <li>Use Vagrant provisioning to install netsim-tools to /opt/netsim-tools </li>
 <li>Change the owner of /opt/netsim-tools to the vagrant user</li>
-<li>Add the vagrant user to the libvirt group</li>
+<li>Add the vagrant user to the libvirt group so we can use libvirt without <code>sudo</code></li>
+<li>Install the dependencies of netsim-tools to the system Python interpreter</li>
 </ol>
+<p><em>Note: We are using the system Python interpreter here instead of the
+virtual Python environment the netsim-tools install playbook creates.
+Normally, this would be a bad idea, but because this is a throwaway VM
+we can remove that complexity.</em></p>
 <p>The output of the Ansible playbook should be echoed to the shell running
 <code>vagrant up</code> so if there are any issues during the provisioning you should
 be able to leverage that as debugging information.</p>
@@ -241,8 +248,10 @@ $ vagrant mutate file:///tmp/nexus9300v.9.3.7.box libvirt
 $ mv ~/.vagrant.d/boxes/nexus9300v.9.3.7/ ~/.vagrant.d/boxes/cisco-VAGRANTSLASH-nexus9300v
 </code></pre></div>
 
-<p>At this point you could start using the box manually, but we will be
-leveraging netsim-tools to do most of the hard lifting for us.</p>
+<p>At this point you could start using the box manually, but we will be leveraging
+netsim-tools to do most of the hard lifting for us. You might also want to copy
+the box folder <code>~/.vagrant.d/boxes/cisco-VAGRANTSLASH-nexus9300v</code> back to
+<code>/vagrant</code> in case you ever need to <code>vagrant destroy</code> you Ubuntu VM.</p>
 <h2>Using netsim-tools</h2>
 <p>Netsim-tools uses a YAML files to describe topologies. These include
 the actual nodes to be provisioned, links between the nodes,
@@ -274,7 +283,6 @@ input and generates the following files as its output:
 - hosts.yml (Ansible inventory)
 - ansible.cfg</p>
 <div class="highlight"><pre><span></span><code>$ <span class="nb">cd</span> /opt/netsim-tools
-$ <span class="nb">source</span> venv/bin/activate
 $ ./create-topology -g -i -c
 Created provider configuration file: Vagrantfile
 Created group_vars <span class="k">for</span> nxos
@@ -314,8 +322,7 @@ install Ansible and the paramiko dependency for the NXOS Ansible modules
 into the virtual Python environment so we don't have to switch between
 the virtual environment and the system Python interpreter all the time.</p>
 <div class="highlight"><pre><span></span><code>$ <span class="nb">cd</span> /opt/netsim-tools
-$ <span class="nb">source</span> venv/bin/activate
-$ pip install ansible paramiko
+$ deactivate  <span class="c1"># Ensure deactivation of the virtual environment</span>
 $ ansible-playbook initial-config.ansible --ssh-extra-args<span class="o">=</span><span class="s1">&#39;-o &quot;StrictHostKeyChecking=no&quot;&#39;</span>
 </code></pre></div>
 
