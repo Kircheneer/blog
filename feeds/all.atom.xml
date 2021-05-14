@@ -191,12 +191,12 @@ the virtual environment and the system Python interpreter all the time.&lt;/p&gt
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ &lt;span class="nb"&gt;cd&lt;/span&gt; /opt/netsim-tools
 $ &lt;span class="nb"&gt;source&lt;/span&gt; venv/bin/activate
 $ pip install ansible paramiko
-$ ansible-playbook initial-config.ansible -k
+$ ansible-playbook initial-config.ansible --ssh-extra-args&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;-o &amp;quot;StrictHostKeyChecking=no&amp;quot;&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Once that's done you can SSH into one of the machines and take a look
 at the routing protocol state:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ vagrant ssh r1
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./connect.sh r1
 &lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;
 r1# sh ip ospf neighbors
  OSPF Process ID &lt;span class="m"&gt;1&lt;/span&gt; VRF default
@@ -243,7 +243,7 @@ user interface guiding me through the process. Finally, I'd like to thank Ivan
 Pepelnjak for his patience in accepting my many pull requests over the course
 of my exploration into the world of netsim-tools.&lt;/p&gt;
 &lt;p&gt;If you want to find out more about netsim-tools, make sure to visit Ivan's
-&lt;a href="https://duckduckgo.com/?q=netsim-tools&amp;amp;sites=ipspace.net"&gt;blog&lt;/a&gt; about it. Thanks
+&lt;a href="https://blog.ipspace.net/series/netsim-tools.html"&gt;blog&lt;/a&gt; about it. Thanks
 for reading!&lt;/p&gt;</content><category term="Networking"></category><category term="ansible"></category><category term="vagrant"></category><category term="libvirt"></category><category term="cisco"></category><category term="linux"></category></entry><entry><title>Improvements to the Netbox webhook receiver</title><link href="https://kircheneer.github.io/blog/improvements-to-the-netbox-webhook-receiver.html" rel="alternate"></link><published>2020-12-19T12:36:00+01:00</published><updated>2020-12-19T12:36:00+01:00</updated><author><name>kirchnerl</name></author><id>tag:kircheneer.github.io,2020-12-19:/blog/improvements-to-the-netbox-webhook-receiver.html</id><summary type="html">&lt;p&gt;&lt;em&gt;You can find the the code used in this post &lt;a href="https://github.com/Kircheneer/webhook_receiver/tree/v0.1.0"&gt;here&lt;/a&gt;.
 If you just need a webhook receiver for Netbox follow the instructions in the README.md file in that repository.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;This is a follow-up to my earlier blog post &lt;a href="https://blog.kirchne.red/programming/netbox-webhook-receiver-with-python-celery-and-fastapi/"&gt;Netbox webhook receiver with Python, Celery and FastAPI&lt;/a&gt;.
