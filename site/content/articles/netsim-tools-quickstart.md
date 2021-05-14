@@ -227,14 +227,14 @@ the virtual environment and the system Python interpreter all the time.
 $ cd /opt/netsim-tools
 $ source venv/bin/activate
 $ pip install ansible paramiko
-$ ansible-playbook initial-config.ansible -k
+$ ansible-playbook initial-config.ansible --ssh-extra-args='-o "StrictHostKeyChecking=no"'
 ```
 
 Once that's done you can SSH into one of the machines and take a look
 at the routing protocol state:
 
 ```
-$ vagrant ssh r1
+$ ./connect.sh r1
 [...]
 r1# sh ip ospf neighbors
  OSPF Process ID 1 VRF default
@@ -287,5 +287,5 @@ Pepelnjak for his patience in accepting my many pull requests over the course
 of my exploration into the world of netsim-tools.
 
 If you want to find out more about netsim-tools, make sure to visit Ivan's
-[blog](https://duckduckgo.com/?q=netsim-tools&sites=ipspace.net) about it. Thanks
+[blog](https://blog.ipspace.net/series/netsim-tools.html) about it. Thanks
 for reading!
