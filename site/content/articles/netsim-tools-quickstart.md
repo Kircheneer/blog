@@ -60,10 +60,12 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
-    apt-get install -y ansible
+    apt-get install -y ansible python3-pip
     wget https://raw.githubusercontent.com/ipspace/netsim-tools/master/install.libvirt
     ansible-playbook install.libvirt
     usermod -aG libvirt vagrant
+    pip install -r /opt/netsim-tools/requirements.txt
+    pip install paramiko
   SHELL
 end
 ```
@@ -77,10 +79,16 @@ This will do the following things (and therefore might take a little while):
 
 1. Download and boot a Ubuntu 20.04 Vagrant box
 1. Enable nested virtualization in the Virtualbox settings of the VM
-1. Install A inside of the box
+1. Install Ansible inside of the box
 1. Use Vagrant provisioning to install netsim-tools to /opt/netsim-tools 
 1. Change the owner of /opt/netsim-tools to the vagrant user
-1. Add the vagrant user to the libvirt group
+1. Add the vagrant user to the libvirt group so we can use libvirt without `sudo`
+1. Install the dependencies of netsim-tools to the system Python interpreter
+
+*Note: We are using the system Python interpreter here instead of the
+virtual Python environment the netsim-tools install playbook creates.
+Normally, this would be a bad idea, but because this is a throwaway VM
+we can remove that complexity.*
 
 The output of the Ansible playbook should be echoed to the shell running
 `vagrant up` so if there are any issues during the provisioning you should
@@ -136,8 +144,10 @@ $ vagrant mutate file:///tmp/nexus9300v.9.3.7.box libvirt
 $ mv ~/.vagrant.d/boxes/nexus9300v.9.3.7/ ~/.vagrant.d/boxes/cisco-VAGRANTSLASH-nexus9300v
 ```
 
-At this point you could start using the box manually, but we will be
-leveraging netsim-tools to do most of the hard lifting for us.
+At this point you could start using the box manually, but we will be leveraging
+netsim-tools to do most of the hard lifting for us. You might also want to copy
+the box folder `~/.vagrant.d/boxes/cisco-VAGRANTSLASH-nexus9300v` back to
+`/vagrant` in case you ever need to `vagrant destroy` you Ubuntu VM.
 
 ## Using netsim-tools
 
@@ -177,7 +187,6 @@ input and generates the following files as its output:
 
 ```bash
 $ cd /opt/netsim-tools
-$ source venv/bin/activate
 $ ./create-topology -g -i -c
 Created provider configuration file: Vagrantfile
 Created group_vars for nxos
@@ -225,8 +234,7 @@ the virtual environment and the system Python interpreter all the time.
 
 ```bash
 $ cd /opt/netsim-tools
-$ source venv/bin/activate
-$ pip install ansible paramiko
+$ deactivate  # Ensure deactivation of the virtual environment
 $ ansible-playbook initial-config.ansible --ssh-extra-args='-o "StrictHostKeyChecking=no"'
 ```
 
