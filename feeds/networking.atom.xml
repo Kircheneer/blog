@@ -1,5 +1,318 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kirchnered Networking - Networking</title><link href="https://kircheneer.github.io/blog/" rel="alternate"></link><link href="https://kircheneer.github.io/blog/feeds/networking.atom.xml" rel="self"></link><id>https://kircheneer.github.io/blog/</id><updated>2021-05-13T14:44:00+02:00</updated><subtitle>Network Engineer</subtitle><entry><title>A quick introduction to netsim-tools</title><link href="https://kircheneer.github.io/blog/netsim-tools-quickstart.html" rel="alternate"></link><published>2021-05-13T14:44:00+02:00</published><updated>2021-05-13T14:44:00+02:00</updated><author><name>kirchnerl</name></author><id>tag:kircheneer.github.io,2021-05-13:/blog/netsim-tools-quickstart.html</id><summary type="html">&lt;p&gt;The somewhat newly released &lt;a href="https://github.com/ipspace/netsim-tools"&gt;netsim-tools&lt;/a&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kirchnered Networking - Networking</title><link href="https://kircheneer.github.io/blog/" rel="alternate"></link><link href="https://kircheneer.github.io/blog/feeds/networking.atom.xml" rel="self"></link><id>https://kircheneer.github.io/blog/</id><updated>2021-05-22T16:00:00+02:00</updated><subtitle>Network Engineer</subtitle><entry><title>Linux Networking for the Cisco Admin</title><link href="https://kircheneer.github.io/blog/linux-networking-for-the-cisco-admin.html" rel="alternate"></link><published>2021-05-22T16:00:00+02:00</published><updated>2021-05-22T16:00:00+02:00</updated><author><name>kirchnerl</name></author><id>tag:kircheneer.github.io,2021-05-22:/blog/linux-networking-for-the-cisco-admin.html</id><summary type="html">&lt;p&gt;If your job as a network administrator is anything like mine then
+you often get pulled somewhat out of your comfort zone by supposed
+network issues in end hosts. Some of the problems I've had to deal
+with in this regard are the following:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Servers with multiple network interfaces where …&lt;/li&gt;&lt;/ul&gt;</summary><content type="html">&lt;p&gt;If your job as a network administrator is anything like mine then
+you often get pulled somewhat out of your comfort zone by supposed
+network issues in end hosts. Some of the problems I've had to deal
+with in this regard are the following:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Servers with multiple network interfaces where a firewall rule
+  was requested for the wrong interface&lt;/li&gt;
+&lt;li&gt;Applications that had trouble correctly setting up their sockets
+  and as a consequence don't listen on the ports they are supposed
+  to listen on&lt;/li&gt;
+&lt;li&gt;Host firewalls blocking traffic destined to the server&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;A handy cheat sheet for these operations can be found at the
+&lt;a href="#cheat-sheet"&gt;end&lt;/a&gt; of this post.&lt;/p&gt;
+&lt;p&gt;But helping server or application administrators is not the only 
+motivation to learn at least a little bit on how networking
+on Linux platforms works. Not only are there things like
+&lt;a href="https://www.nvidia.com/en-us/networking/ethernet-switching/cumulus-linux/"&gt;Cumulus Linux&lt;/a&gt;
+or &lt;a href="https://frrouting.org/"&gt;FRRouting&lt;/a&gt; (the latter of which is also
+used by the former) which you might encounter running on actual
+networking gear in the forwarding path between servers. If you want
+to get into network automation you will undoubtedly encounter Linux.
+You might for example want to run
+&lt;a href="https://docs.ansible.com/ansible/latest/network/index.html"&gt;Ansible&lt;/a&gt;
+or &lt;a href="https://netbox.readthedocs.io/en/stable/"&gt;Netbox&lt;/a&gt; / &lt;a href="https://www.networktocode.com/nautobot/"&gt;Nautobot&lt;/a&gt;
+both of which (currently) only run on Linux.&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;First we will start looking into ways of getting information about
+its networking configuration and operational status from a modern
+Linux system. I will be using a fresh Ubuntu 20.04 install via
+Vagrant - you can use the following Vagrantfile if you want to
+follow along.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# -*- mode: ruby -*-&lt;/span&gt;
+&lt;span class="c1"&gt;# vi: set ft=ruby :&lt;/span&gt;
+&lt;span class="no"&gt;Vagrant&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;configure&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;2&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;
+  &lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;vm&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;box&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;generic/ubuntu2004&amp;quot;&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;Note: By modern I mean a system that has
+&lt;a href="https://linux.die.net/man/8/ip"&gt;iproute2&lt;/a&gt; available instead of or
+in addition to the mostly deprecated
+&lt;a href="https://linux.die.net/man/8/ifconfig"&gt;ifconfig&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;h2&gt;Collecting basic operational networking data with &lt;code&gt;ip&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;One of the first things I learned on Cisco gear was
+&lt;code&gt;show ip interface brief&lt;/code&gt; to output basic information about any
+layer 3 interfaces. The more or less equivalent command from the
+&lt;code&gt;iproute2&lt;/code&gt; command suite would be &lt;code&gt;ip -brief address show&lt;/code&gt;. The
+Ubuntu VM I'm using currently only has one interface facing my
+hypervisor as well as one loopback interface so the output is
+quite short for now.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ip -brief address show
+lo               UNKNOWN        &lt;span class="m"&gt;127&lt;/span&gt;.0.0.1/8
+eth0             UP             &lt;span class="m"&gt;10&lt;/span&gt;.0.2.15/24 fe80::a00:27ff:fe05:8f3d/64
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;As you can see the two aforementioned interfaces are present.
+Furthermore, you can see their operational status (with lo being
+&lt;code&gt;UNKNOWN&lt;/code&gt; as it is a loopback interface) as well as any IP
+addresses configured on those devices.&lt;/p&gt;
+&lt;p&gt;Of course, most people don't type &lt;code&gt;show ip interface brief&lt;/code&gt; on
+Cisco gear - I myself shorten that to &lt;code&gt;sh ip int brief&lt;/code&gt; (which
+is still more characters than really necessary). Similar to that,
+I use &lt;code&gt;ip a&lt;/code&gt; on Linux devices. As you can see you can both shorten
+the commands and omit the &lt;code&gt;show&lt;/code&gt; as it is the default behavior.&lt;/p&gt;
+&lt;p&gt;Using &lt;code&gt;ip -s address&lt;/code&gt; (with '-s' standing for 'statistics' and
+no '-br' for 'brief') you get the the output of &lt;code&gt;sh ip int brief&lt;/code&gt;
+interspersed with the some of the output of &lt;code&gt;show interface&lt;/code&gt;
+(namely the statistics):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ip -s address
+&lt;span class="m"&gt;1&lt;/span&gt;: lo: &amp;lt;LOOPBACK,UP,LOWER_UP&amp;gt; mtu &lt;span class="m"&gt;65536&lt;/span&gt; qdisc noqueue state UNKNOWN group default qlen &lt;span class="m"&gt;1000&lt;/span&gt;
+    link/loopback &lt;span class="m"&gt;00&lt;/span&gt;:00:00:00:00:00 brd &lt;span class="m"&gt;00&lt;/span&gt;:00:00:00:00:00
+    inet &lt;span class="m"&gt;127&lt;/span&gt;.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    RX: bytes  packets  errors  dropped overrun mcast
+    &lt;span class="m"&gt;3640&lt;/span&gt;       &lt;span class="m"&gt;44&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;
+    TX: bytes  packets  errors  dropped carrier collsns
+    &lt;span class="m"&gt;3640&lt;/span&gt;       &lt;span class="m"&gt;44&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;
+&lt;span class="m"&gt;2&lt;/span&gt;: eth0: &amp;lt;BROADCAST,MULTICAST,UP,LOWER_UP&amp;gt; mtu &lt;span class="m"&gt;1500&lt;/span&gt; qdisc fq_codel state UP group default qlen &lt;span class="m"&gt;1000&lt;/span&gt;
+    link/ether &lt;span class="m"&gt;08&lt;/span&gt;:00:27:05:8f:3d brd ff:ff:ff:ff:ff:ff
+    inet &lt;span class="m"&gt;10&lt;/span&gt;.0.2.15/24 brd &lt;span class="m"&gt;10&lt;/span&gt;.0.2.255 scope global dynamic eth0
+       valid_lft 79238sec preferred_lft 79238sec
+    inet6 fe80::a00:27ff:fe05:8f3d/64 scope link
+       valid_lft forever preferred_lft forever
+    RX: bytes  packets  errors  dropped overrun mcast
+    &lt;span class="m"&gt;1108533&lt;/span&gt;    &lt;span class="m"&gt;3680&lt;/span&gt;     &lt;span class="m"&gt;0&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;
+    TX: bytes  packets  errors  dropped carrier collsns
+    &lt;span class="m"&gt;220015&lt;/span&gt;     &lt;span class="m"&gt;2047&lt;/span&gt;     &lt;span class="m"&gt;0&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;       &lt;span class="m"&gt;0&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Another commonly used command on Cisco devices would
+be &lt;code&gt;show ip route&lt;/code&gt;. By now you can probably tell yourself
+what th equivalent for the &lt;code&gt;iproute2&lt;/code&gt; suite would be:
+&lt;code&gt;ip route&lt;/code&gt; with an optional &lt;code&gt;show&lt;/code&gt; at the end (which is
+the same words just in a different order):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ip route show
+default via &lt;span class="m"&gt;10&lt;/span&gt;.0.2.2 dev eth0 proto dhcp src &lt;span class="m"&gt;10&lt;/span&gt;.0.2.15 metric &lt;span class="m"&gt;100&lt;/span&gt;
+&lt;span class="m"&gt;10&lt;/span&gt;.0.2.0/24 dev eth0 proto kernel scope link src &lt;span class="m"&gt;10&lt;/span&gt;.0.2.15
+&lt;span class="m"&gt;10&lt;/span&gt;.0.2.2 dev eth0 proto dhcp scope link src &lt;span class="m"&gt;10&lt;/span&gt;.0.2.15 metric &lt;span class="m"&gt;100&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now this is also comparatively boring as we only have
+- A default route from DHCP
+- A directly attached route for the network
+- A host route for the interface itself
+For comparison, here's a short excerpt from the Cisco
+CLI containing the same kinds of routes (except for the
+default route which is statically configured instead of
+being issued by DHCP).&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Switch&lt;/span&gt;&lt;span class="c1"&gt;#show ip route&lt;/span&gt;
+&lt;span class="n"&gt;Codes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;L&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;local&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;C&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;connected&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;S&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="k"&gt;static&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;R&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;RIP&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;M&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;mobile&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;B&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;BGP&lt;/span&gt;
+       &lt;span class="n"&gt;D&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;EIGRP&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;EX&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;EIGRP&lt;/span&gt; &lt;span class="n"&gt;external&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;O&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;OSPF&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IA&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;OSPF&lt;/span&gt; &lt;span class="n"&gt;inter&lt;/span&gt; &lt;span class="n"&gt;area&lt;/span&gt;
+       &lt;span class="n"&gt;N1&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;OSPF&lt;/span&gt; &lt;span class="n"&gt;NSSA&lt;/span&gt; &lt;span class="n"&gt;external&lt;/span&gt; &lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;N2&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;OSPF&lt;/span&gt; &lt;span class="n"&gt;NSSA&lt;/span&gt; &lt;span class="n"&gt;external&lt;/span&gt; &lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+       &lt;span class="n"&gt;E1&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;OSPF&lt;/span&gt; &lt;span class="n"&gt;external&lt;/span&gt; &lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;E2&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;OSPF&lt;/span&gt; &lt;span class="n"&gt;external&lt;/span&gt; &lt;span class="n"&gt;type&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+       &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;IS&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;IS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;su&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;IS&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;IS&lt;/span&gt; &lt;span class="n"&gt;summary&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;L1&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;IS&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;IS&lt;/span&gt; &lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;L2&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;IS&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;IS&lt;/span&gt; &lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+       &lt;span class="n"&gt;ia&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;IS&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;IS&lt;/span&gt; &lt;span class="n"&gt;inter&lt;/span&gt; &lt;span class="n"&gt;area&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;candidate&lt;/span&gt; &lt;span class="n"&gt;default&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;U&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;per&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;user&lt;/span&gt; &lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="n"&gt;route&lt;/span&gt;
+       &lt;span class="n"&gt;o&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;ODR&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;P&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;periodic&lt;/span&gt; &lt;span class="n"&gt;downloaded&lt;/span&gt; &lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="n"&gt;route&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;H&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;NHRP&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;LISP&lt;/span&gt;
+       &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;application&lt;/span&gt; &lt;span class="n"&gt;route&lt;/span&gt;
+       &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;replicated&lt;/span&gt; &lt;span class="n"&gt;route&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;next&lt;/span&gt; &lt;span class="n"&gt;hop&lt;/span&gt; &lt;span class="n"&gt;override&lt;/span&gt;
+
+&lt;span class="n"&gt;Gateway&lt;/span&gt; &lt;span class="n"&gt;of&lt;/span&gt; &lt;span class="n"&gt;last&lt;/span&gt; &lt;span class="n"&gt;resort&lt;/span&gt; &lt;span class="k"&gt;is&lt;/span&gt; &lt;span class="mf"&gt;192.168&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mf"&gt;2.1&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="n"&gt;network&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mf"&gt;0.0&lt;/span&gt;
+
+&lt;span class="n"&gt;S&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;    &lt;span class="mf"&gt;0.0&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mf"&gt;0.0&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="n"&gt;via&lt;/span&gt; &lt;span class="mf"&gt;192.168&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mf"&gt;2.1&lt;/span&gt;
+      &lt;span class="mf"&gt;192.168&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mf"&gt;2.0&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;24&lt;/span&gt; &lt;span class="k"&gt;is&lt;/span&gt; &lt;span class="n"&gt;variably&lt;/span&gt; &lt;span class="n"&gt;subnetted&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="n"&gt;subnets&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="n"&gt;masks&lt;/span&gt;
+&lt;span class="n"&gt;C&lt;/span&gt;        &lt;span class="mf"&gt;192.168&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mf"&gt;2.0&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;24&lt;/span&gt; &lt;span class="k"&gt;is&lt;/span&gt; &lt;span class="n"&gt;directly&lt;/span&gt; &lt;span class="n"&gt;connected&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;GigabitEthernet0&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;L&lt;/span&gt;        &lt;span class="mf"&gt;192.168&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mf"&gt;2.100&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;32&lt;/span&gt; &lt;span class="k"&gt;is&lt;/span&gt; &lt;span class="n"&gt;directly&lt;/span&gt; &lt;span class="n"&gt;connected&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;GigabitEthernet0&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally there is &lt;code&gt;ip neigh&lt;/code&gt; (equivalent to &lt;code&gt;show ip arp&lt;/code&gt;) available
+to query the ARP table of the Linux host:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ip neigh show
+&lt;span class="m"&gt;10&lt;/span&gt;.0.2.2 dev eth0 lladdr &lt;span class="m"&gt;52&lt;/span&gt;:54:00:12:35:02 REACHABLE 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;With these simple commands you can already a lot of common
+networking issues on Linux systems I have encountered:
+- Wrongly configured subnet masks
+- Missing (default) routes 
+- Multiple interfaces with traffic using ones you didn't expect
+  they would&lt;/p&gt;
+&lt;p&gt;If you take a look at &lt;code&gt;ip help&lt;/code&gt; you can see there's a host
+(pun intended) of other commands available for querying:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ip &lt;span class="nb"&gt;help&lt;/span&gt;
+Usage: ip &lt;span class="o"&gt;[&lt;/span&gt; OPTIONS &lt;span class="o"&gt;]&lt;/span&gt; OBJECT &lt;span class="o"&gt;{&lt;/span&gt; COMMAND &lt;span class="p"&gt;|&lt;/span&gt; &lt;span class="nb"&gt;help&lt;/span&gt; &lt;span class="o"&gt;}&lt;/span&gt;
+       ip &lt;span class="o"&gt;[&lt;/span&gt; -force &lt;span class="o"&gt;]&lt;/span&gt; -batch filename
+where  OBJECT :&lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt; link &lt;span class="p"&gt;|&lt;/span&gt; address &lt;span class="p"&gt;|&lt;/span&gt; addrlabel &lt;span class="p"&gt;|&lt;/span&gt; route &lt;span class="p"&gt;|&lt;/span&gt; rule &lt;span class="p"&gt;|&lt;/span&gt; neigh &lt;span class="p"&gt;|&lt;/span&gt; ntable &lt;span class="p"&gt;|&lt;/span&gt;
+                   tunnel &lt;span class="p"&gt;|&lt;/span&gt; tuntap &lt;span class="p"&gt;|&lt;/span&gt; maddress &lt;span class="p"&gt;|&lt;/span&gt; mroute &lt;span class="p"&gt;|&lt;/span&gt; mrule &lt;span class="p"&gt;|&lt;/span&gt; monitor &lt;span class="p"&gt;|&lt;/span&gt; xfrm &lt;span class="p"&gt;|&lt;/span&gt;
+                   netns &lt;span class="p"&gt;|&lt;/span&gt; l2tp &lt;span class="p"&gt;|&lt;/span&gt; fou &lt;span class="p"&gt;|&lt;/span&gt; macsec &lt;span class="p"&gt;|&lt;/span&gt; tcp_metrics &lt;span class="p"&gt;|&lt;/span&gt; token &lt;span class="p"&gt;|&lt;/span&gt; netconf &lt;span class="p"&gt;|&lt;/span&gt; ila &lt;span class="p"&gt;|&lt;/span&gt;
+                   vrf &lt;span class="p"&gt;|&lt;/span&gt; sr &lt;span class="p"&gt;|&lt;/span&gt; nexthop &lt;span class="o"&gt;}&lt;/span&gt;
+       OPTIONS :&lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt; -V&lt;span class="o"&gt;[&lt;/span&gt;ersion&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; -s&lt;span class="o"&gt;[&lt;/span&gt;tatistics&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; -d&lt;span class="o"&gt;[&lt;/span&gt;etails&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; -r&lt;span class="o"&gt;[&lt;/span&gt;esolve&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt;
+                    -h&lt;span class="o"&gt;[&lt;/span&gt;uman-readable&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; -iec &lt;span class="p"&gt;|&lt;/span&gt; -j&lt;span class="o"&gt;[&lt;/span&gt;son&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; -p&lt;span class="o"&gt;[&lt;/span&gt;retty&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt;
+                    -f&lt;span class="o"&gt;[&lt;/span&gt;amily&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt; inet &lt;span class="p"&gt;|&lt;/span&gt; inet6 &lt;span class="p"&gt;|&lt;/span&gt; mpls &lt;span class="p"&gt;|&lt;/span&gt; bridge &lt;span class="p"&gt;|&lt;/span&gt; link &lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt;
+                    -4 &lt;span class="p"&gt;|&lt;/span&gt; -6 &lt;span class="p"&gt;|&lt;/span&gt; -I &lt;span class="p"&gt;|&lt;/span&gt; -D &lt;span class="p"&gt;|&lt;/span&gt; -M &lt;span class="p"&gt;|&lt;/span&gt; -B &lt;span class="p"&gt;|&lt;/span&gt; -0 &lt;span class="p"&gt;|&lt;/span&gt;
+                    -l&lt;span class="o"&gt;[&lt;/span&gt;oops&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt; maximum-addr-flush-attempts &lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; -br&lt;span class="o"&gt;[&lt;/span&gt;ief&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt;
+                    -o&lt;span class="o"&gt;[&lt;/span&gt;neline&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; -t&lt;span class="o"&gt;[&lt;/span&gt;imestamp&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; -ts&lt;span class="o"&gt;[&lt;/span&gt;hort&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; -b&lt;span class="o"&gt;[&lt;/span&gt;atch&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;filename&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt;
+                    -rc&lt;span class="o"&gt;[&lt;/span&gt;vbuf&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;size&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; -n&lt;span class="o"&gt;[&lt;/span&gt;etns&lt;span class="o"&gt;]&lt;/span&gt; name &lt;span class="p"&gt;|&lt;/span&gt; -N&lt;span class="o"&gt;[&lt;/span&gt;umeric&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; -a&lt;span class="o"&gt;[&lt;/span&gt;ll&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt;
+                    -c&lt;span class="o"&gt;[&lt;/span&gt;olor&lt;span class="o"&gt;]}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If you're interested in a good article on the topic of VRFs in
+the Linux world, I recommend you go take a look at
+&lt;a href="https://www.dasblinkenlichten.com/working-with-linux-vrfs/"&gt;this article&lt;/a&gt;
+by Jon Langemak.&lt;/p&gt;
+&lt;h2&gt;Using &lt;code&gt;jq&lt;/code&gt; to query JSON output&lt;/h2&gt;
+&lt;p&gt;Sometimes you might want to filter the output of the commands
+to get exactly the data you need in the format you need it in.
+Luckily, the &lt;code&gt;ip&lt;/code&gt; command supports the outputting of 
+structured data in the form of JSON by virtue of the &lt;code&gt;-j&lt;/code&gt; flag:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ip -j route
+&lt;span class="o"&gt;[{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;dst&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;default&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;gateway&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;10.0.2.2&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;dev&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;eth0&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;dhcp&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;prefsrc&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;10.0.2.15&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;metric&amp;quot;&lt;/span&gt;:100,&lt;span class="s2"&gt;&amp;quot;flags&amp;quot;&lt;/span&gt;:&lt;span class="o"&gt;[]}&lt;/span&gt;,&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;dst&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;10.0.2.0/24&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;dev&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;eth0&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;kernel&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;scope&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;link&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;prefsrc&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;10.0.2.15&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;flags&amp;quot;&lt;/span&gt;:&lt;span class="o"&gt;[]}&lt;/span&gt;,&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;dst&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;10.0.2.2&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;dev&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;eth0&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;dhcp&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;scope&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;link&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;prefsrc&amp;quot;&lt;/span&gt;:&lt;span class="s2"&gt;&amp;quot;10.0.2.15&amp;quot;&lt;/span&gt;,&lt;span class="s2"&gt;&amp;quot;metric&amp;quot;&lt;/span&gt;:100,&lt;span class="s2"&gt;&amp;quot;flags&amp;quot;&lt;/span&gt;:&lt;span class="o"&gt;[]}]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That output is not really pretty, is it? Enter: &lt;code&gt;jq&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Note: If you're following along on a brand new VM
+you will at this point have to install the jq tool.
+In the Ubuntu machine you get by using the Vagrantfile
+at the beginning of this post that is done by
+&lt;code&gt;sudo apt install jq -y&lt;/code&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;jq&lt;/code&gt; is a command line JSON processor. In its simplest
+form, we can use it to format the data in a prettier way:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ip -j route &lt;span class="p"&gt;|&lt;/span&gt; jq
+&lt;span class="o"&gt;[&lt;/span&gt;
+  &lt;span class="o"&gt;{&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;dst&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;default&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;gateway&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;10.0.2.2&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;dev&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;eth0&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;dhcp&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;prefsrc&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;10.0.2.15&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;metric&amp;quot;&lt;/span&gt;: &lt;span class="m"&gt;100&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;flags&amp;quot;&lt;/span&gt;: &lt;span class="o"&gt;[]&lt;/span&gt;
+  &lt;span class="o"&gt;}&lt;/span&gt;,
+  &lt;span class="o"&gt;{&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;dst&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;10.0.2.0/24&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;dev&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;eth0&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;kernel&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;scope&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;link&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;prefsrc&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;10.0.2.15&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;flags&amp;quot;&lt;/span&gt;: &lt;span class="o"&gt;[]&lt;/span&gt;
+  &lt;span class="o"&gt;}&lt;/span&gt;,
+  &lt;span class="o"&gt;{&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;dst&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;10.0.2.2&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;dev&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;eth0&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;dhcp&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;scope&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;link&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;prefsrc&amp;quot;&lt;/span&gt;: &lt;span class="s2"&gt;&amp;quot;10.0.2.15&amp;quot;&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;metric&amp;quot;&lt;/span&gt;: &lt;span class="m"&gt;100&lt;/span&gt;,
+    &lt;span class="s2"&gt;&amp;quot;flags&amp;quot;&lt;/span&gt;: &lt;span class="o"&gt;[]&lt;/span&gt;
+  &lt;span class="o"&gt;}&lt;/span&gt;
+&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;While nicely colored and formatted CLI output is a
+nice-to-have goodie, &lt;code&gt;jq&lt;/code&gt; really starts to shine
+once you need to filter data you receive. Say you
+want to find all interfaces that have transmitted
+at least 100000 bytes of traffic and output their
+names, you could use the following command to do
+that:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ip -j -s address &lt;span class="p"&gt;|&lt;/span&gt; jq &lt;span class="s1"&gt;&amp;#39;.[] | select(.stats64.rx.bytes &amp;gt; 100000) | .ifname&amp;#39;&lt;/span&gt;
+&lt;span class="s2"&gt;&amp;quot;eth0&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;I am aware that this example is somewhat
+removed from what you might need in reality - I'm
+merely using to show of some of what &lt;code&gt;jq&lt;/code&gt; can do.
+You could just as well use this command to find
+interfaces with error counters to identify potential
+issues with packet loss.&lt;/p&gt;
+&lt;h2&gt;Collecting application level data&lt;/h2&gt;
+&lt;p&gt;When troubleshooting networking issues at any point
+it's - in my opinion - always a good idea to start
+at the bottom of the stack. Once you have verified
+that the server has link status and appropriate
+IP addresses as well as routes configured we can start
+to verify if the fault lies with the application itself.
+In order for any network communication to happen, a
+socket has to have been opened on the correct TCP/UPD port.
+The modern way of doing this is with the &lt;code&gt;ss&lt;/code&gt; command
+(make sure to run with &lt;code&gt;sudo&lt;/code&gt; if you want the process names
+to be output as well):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ sudo ss -tulpen
+Netid State  Recv-Q Send-Q Local Address:Port Peer Address:Port Process
+udp   UNCONN &lt;span class="m"&gt;0&lt;/span&gt;      &lt;span class="m"&gt;0&lt;/span&gt;      &lt;span class="m"&gt;127&lt;/span&gt;.0.0.53%lo:53   &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:*         users:&lt;span class="o"&gt;((&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;systemd-resolve&amp;quot;&lt;/span&gt;,pid&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;520&lt;/span&gt;,fd&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;12&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt; uid:101 ino:19780 sk:52 &amp;lt;-&amp;gt;
+udp   UNCONN &lt;span class="m"&gt;0&lt;/span&gt;      &lt;span class="m"&gt;0&lt;/span&gt;      &lt;span class="m"&gt;10&lt;/span&gt;.0.2.15%eth0:68  &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:*         users:&lt;span class="o"&gt;((&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;systemd-network&amp;quot;&lt;/span&gt;,pid&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;379&lt;/span&gt;,fd&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;19&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt; uid:100 ino:23836 sk:53 &amp;lt;-&amp;gt;
+tcp   LISTEN &lt;span class="m"&gt;0&lt;/span&gt;      &lt;span class="m"&gt;4096&lt;/span&gt;   &lt;span class="m"&gt;127&lt;/span&gt;.0.0.53%lo:53   &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:*         users:&lt;span class="o"&gt;((&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;systemd-resolve&amp;quot;&lt;/span&gt;,pid&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;520&lt;/span&gt;,fd&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;13&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt; uid:101 ino:19781 sk:54 &amp;lt;-&amp;gt;
+tcp   LISTEN &lt;span class="m"&gt;0&lt;/span&gt;      &lt;span class="m"&gt;128&lt;/span&gt;    &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:22         &lt;span class="m"&gt;0&lt;/span&gt;.0.0.0:*         users:&lt;span class="o"&gt;((&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;sshd&amp;quot;&lt;/span&gt;,pid&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1059&lt;/span&gt;,fd&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt; ino:24086 sk:55 &amp;lt;-&amp;gt;
+tcp   LISTEN &lt;span class="m"&gt;0&lt;/span&gt;      &lt;span class="m"&gt;128&lt;/span&gt;    &lt;span class="o"&gt;[&lt;/span&gt;::&lt;span class="o"&gt;]&lt;/span&gt;:22            &lt;span class="o"&gt;[&lt;/span&gt;::&lt;span class="o"&gt;]&lt;/span&gt;:*            users:&lt;span class="o"&gt;((&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;sshd&amp;quot;&lt;/span&gt;,pid&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1059&lt;/span&gt;,fd&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt; ino:24088 sk:56 v6only:1 &amp;lt;-&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is an overview of all the open sockets (read:
+transport layer ports accepting traffic). You can also
+get a list of open connections using &lt;code&gt;ss&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ Netid State Recv-Q Send-Q Local Address:Port Peer Address:Port Process
+tcp     ESTAB &lt;span class="m"&gt;0&lt;/span&gt;      &lt;span class="m"&gt;0&lt;/span&gt;      &lt;span class="m"&gt;10&lt;/span&gt;.0.2.15:ssh      &lt;span class="m"&gt;10&lt;/span&gt;.0.2.2:35294
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You can for example use this output and match it up with
+firewall logs or packet captures to see if clients
+trying to establishing sessions are successful in doing so.&lt;/p&gt;
+&lt;h1&gt;Command mapping table &lt;span id="cheat-sheet"&gt;&lt;span&gt;&lt;/h1&gt;
+&lt;p&gt;Finally, I have compiled a small, cheat-sheet-esque table
+mapping Cisco commands to &lt;code&gt;iproute2&lt;/code&gt; commands (with no
+attempt at covering all there is to cover):&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Cisco IOS/NXOS&lt;/th&gt;
+&lt;th&gt;&lt;code&gt;iproute2&lt;/code&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;show ip interface brief&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;ip -br address&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;show interface eth1/1&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;ip -s link show eth0&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;show ip route&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;ip route&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;show ip route 192.0.2.1&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;ip route get 192.0.2.1&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;show ip route | json&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;ip -j route&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;show ip arp&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;ip neigh&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;show ip vrf&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;ip vrf&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;conf t&lt;/code&gt;, &lt;code&gt;int eth1/1&lt;/code&gt;, &lt;code&gt;shut&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;ip link set eth0 down&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;conf t&lt;/code&gt;, &lt;code&gt;int eth1/1&lt;/code&gt;, &lt;code&gt;no shut&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;ip link set eth0 up&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;</content><category term="Networking"></category><category term="cisco"></category><category term="linux"></category></entry><entry><title>A quick introduction to netsim-tools</title><link href="https://kircheneer.github.io/blog/netsim-tools-quickstart.html" rel="alternate"></link><published>2021-05-13T14:44:00+02:00</published><updated>2021-05-13T14:44:00+02:00</updated><author><name>kirchnerl</name></author><id>tag:kircheneer.github.io,2021-05-13:/blog/netsim-tools-quickstart.html</id><summary type="html">&lt;p&gt;The somewhat newly released &lt;a href="https://github.com/ipspace/netsim-tools"&gt;netsim-tools&lt;/a&gt;
 by &lt;a href="https://www.ipspace.net/Main_Page"&gt;Ivan Pepelnjak&lt;/a&gt; has been on my "check-this-out" list for a couple of weeks
 now. It contains a set of tools to simplify the process of creating virtual network
 labs. In the following sections I will lay out how to quickly get started with

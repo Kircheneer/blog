@@ -1,0 +1,474 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/stylesheet/style.min.css">
+
+
+    <link id="pygments-light-theme" rel="stylesheet" type="text/css"
+          href="https://kircheneer.github.io/blog/theme/pygments/github.min.css">
+
+
+  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/solid.css">
+
+
+    <link href="https://kircheneer.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
+
+
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-183762699-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#333">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#333">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#333">
+
+<meta name="author" content="kirchnerl" />
+<meta name="description" content="If your job as a network administrator is anything like mine then you often get pulled somewhat out of your comfort zone by supposed network issues in end hosts. Some of the problems I&#39;ve had to deal with in this regard are the following: Servers with multiple network interfaces where …" />
+<meta name="keywords" content="cisco, linux">
+
+
+<meta property="og:site_name" content="Kirchnered Networking"/>
+<meta property="og:title" content="Linux Networking for the Cisco Admin"/>
+<meta property="og:description" content="If your job as a network administrator is anything like mine then you often get pulled somewhat out of your comfort zone by supposed network issues in end hosts. Some of the problems I&#39;ve had to deal with in this regard are the following: Servers with multiple network interfaces where …"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="https://kircheneer.github.io/blog/linux-networking-for-the-cisco-admin.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2021-05-22 16:00:00+02:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://kircheneer.github.io/blog/author/kirchnerl.html">
+<meta property="article:section" content="Networking"/>
+<meta property="article:tag" content="cisco"/>
+<meta property="article:tag" content="linux"/>
+<meta property="og:image" content="/images/profile.png">
+
+  <title>Kirchnered Networking &ndash; Linux Networking for the Cisco Admin</title>
+
+</head>
+<body class="light-theme">
+  <aside>
+    <div>
+      <a href="https://kircheneer.github.io/blog">
+        <img src="/images/profile.png" alt="Kirchnered Networking" title="Kirchnered Networking">
+      </a>
+
+      <h1>
+        <a href="https://kircheneer.github.io/blog">Kirchnered Networking</a>
+      </h1>
+
+<p>Network Engineer</p>
+
+
+      <ul class="social">
+          <li>
+            <a  class="sc-github" href="https://github.com/Kircheneer" target="_blank">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+          <li>
+            <a  class="sc-rss" href="/feeds/all.atom.xml" target="_blank">
+              <i class="fas fa-rss"></i>
+            </a>
+          </li>
+      </ul>
+    </div>
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://kircheneer.github.io/blog">Home</a>
+
+      <a href="/archives.html">Archives</a>
+      <a href="/categories.html">Categories</a>
+      <a href="/tags.html">Tags</a>
+
+      <a href="https://kircheneer.github.io/blog/feeds/all.atom.xml">Atom</a>
+
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="linux-networking-for-the-cisco-admin">Linux Networking for the Cisco Admin</h1>
+    <p>
+      Posted on Sat 22 May 2021 in <a href="https://kircheneer.github.io/blog/category/networking.html">Networking</a>
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>If your job as a network administrator is anything like mine then
+you often get pulled somewhat out of your comfort zone by supposed
+network issues in end hosts. Some of the problems I've had to deal
+with in this regard are the following:</p>
+<ul>
+<li>Servers with multiple network interfaces where a firewall rule
+  was requested for the wrong interface</li>
+<li>Applications that had trouble correctly setting up their sockets
+  and as a consequence don't listen on the ports they are supposed
+  to listen on</li>
+<li>Host firewalls blocking traffic destined to the server</li>
+</ul>
+<p>A handy cheat sheet for these operations can be found at the
+<a href="#cheat-sheet">end</a> of this post.</p>
+<p>But helping server or application administrators is not the only 
+motivation to learn at least a little bit on how networking
+on Linux platforms works. Not only are there things like
+<a href="https://www.nvidia.com/en-us/networking/ethernet-switching/cumulus-linux/">Cumulus Linux</a>
+or <a href="https://frrouting.org/">FRRouting</a> (the latter of which is also
+used by the former) which you might encounter running on actual
+networking gear in the forwarding path between servers. If you want
+to get into network automation you will undoubtedly encounter Linux.
+You might for example want to run
+<a href="https://docs.ansible.com/ansible/latest/network/index.html">Ansible</a>
+or <a href="https://netbox.readthedocs.io/en/stable/">Netbox</a> / <a href="https://www.networktocode.com/nautobot/">Nautobot</a>
+both of which (currently) only run on Linux.</p>
+<hr>
+<p>First we will start looking into ways of getting information about
+its networking configuration and operational status from a modern
+Linux system. I will be using a fresh Ubuntu 20.04 install via
+Vagrant - you can use the following Vagrantfile if you want to
+follow along.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># -*- mode: ruby -*-</span>
+<span class="c1"># vi: set ft=ruby :</span>
+<span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;generic/ubuntu2004&quot;</span>
+<span class="k">end</span>
+</code></pre></div>
+
+<p><em>Note: By modern I mean a system that has
+<a href="https://linux.die.net/man/8/ip">iproute2</a> available instead of or
+in addition to the mostly deprecated
+<a href="https://linux.die.net/man/8/ifconfig">ifconfig</a>.</em></p>
+<h2>Collecting basic operational networking data with <code>ip</code></h2>
+<p>One of the first things I learned on Cisco gear was
+<code>show ip interface brief</code> to output basic information about any
+layer 3 interfaces. The more or less equivalent command from the
+<code>iproute2</code> command suite would be <code>ip -brief address show</code>. The
+Ubuntu VM I'm using currently only has one interface facing my
+hypervisor as well as one loopback interface so the output is
+quite short for now.</p>
+<div class="highlight"><pre><span></span><code>$ ip -brief address show
+lo               UNKNOWN        <span class="m">127</span>.0.0.1/8
+eth0             UP             <span class="m">10</span>.0.2.15/24 fe80::a00:27ff:fe05:8f3d/64
+</code></pre></div>
+
+<p>As you can see the two aforementioned interfaces are present.
+Furthermore, you can see their operational status (with lo being
+<code>UNKNOWN</code> as it is a loopback interface) as well as any IP
+addresses configured on those devices.</p>
+<p>Of course, most people don't type <code>show ip interface brief</code> on
+Cisco gear - I myself shorten that to <code>sh ip int brief</code> (which
+is still more characters than really necessary). Similar to that,
+I use <code>ip a</code> on Linux devices. As you can see you can both shorten
+the commands and omit the <code>show</code> as it is the default behavior.</p>
+<p>Using <code>ip -s address</code> (with '-s' standing for 'statistics' and
+no '-br' for 'brief') you get the the output of <code>sh ip int brief</code>
+interspersed with the some of the output of <code>show interface</code>
+(namely the statistics):</p>
+<div class="highlight"><pre><span></span><code>$ ip -s address
+<span class="m">1</span>: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span class="m">65536</span> qdisc noqueue state UNKNOWN group default qlen <span class="m">1000</span>
+    link/loopback <span class="m">00</span>:00:00:00:00:00 brd <span class="m">00</span>:00:00:00:00:00
+    inet <span class="m">127</span>.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    RX: bytes  packets  errors  dropped overrun mcast
+    <span class="m">3640</span>       <span class="m">44</span>       <span class="m">0</span>       <span class="m">0</span>       <span class="m">0</span>       <span class="m">0</span>
+    TX: bytes  packets  errors  dropped carrier collsns
+    <span class="m">3640</span>       <span class="m">44</span>       <span class="m">0</span>       <span class="m">0</span>       <span class="m">0</span>       <span class="m">0</span>
+<span class="m">2</span>: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class="m">1500</span> qdisc fq_codel state UP group default qlen <span class="m">1000</span>
+    link/ether <span class="m">08</span>:00:27:05:8f:3d brd ff:ff:ff:ff:ff:ff
+    inet <span class="m">10</span>.0.2.15/24 brd <span class="m">10</span>.0.2.255 scope global dynamic eth0
+       valid_lft 79238sec preferred_lft 79238sec
+    inet6 fe80::a00:27ff:fe05:8f3d/64 scope link
+       valid_lft forever preferred_lft forever
+    RX: bytes  packets  errors  dropped overrun mcast
+    <span class="m">1108533</span>    <span class="m">3680</span>     <span class="m">0</span>       <span class="m">0</span>       <span class="m">0</span>       <span class="m">0</span>
+    TX: bytes  packets  errors  dropped carrier collsns
+    <span class="m">220015</span>     <span class="m">2047</span>     <span class="m">0</span>       <span class="m">0</span>       <span class="m">0</span>       <span class="m">0</span>
+</code></pre></div>
+
+<p>Another commonly used command on Cisco devices would
+be <code>show ip route</code>. By now you can probably tell yourself
+what th equivalent for the <code>iproute2</code> suite would be:
+<code>ip route</code> with an optional <code>show</code> at the end (which is
+the same words just in a different order):</p>
+<div class="highlight"><pre><span></span><code>$ ip route show
+default via <span class="m">10</span>.0.2.2 dev eth0 proto dhcp src <span class="m">10</span>.0.2.15 metric <span class="m">100</span>
+<span class="m">10</span>.0.2.0/24 dev eth0 proto kernel scope link src <span class="m">10</span>.0.2.15
+<span class="m">10</span>.0.2.2 dev eth0 proto dhcp scope link src <span class="m">10</span>.0.2.15 metric <span class="m">100</span>
+</code></pre></div>
+
+<p>Now this is also comparatively boring as we only have
+- A default route from DHCP
+- A directly attached route for the network
+- A host route for the interface itself
+For comparison, here's a short excerpt from the Cisco
+CLI containing the same kinds of routes (except for the
+default route which is statically configured instead of
+being issued by DHCP).</p>
+<div class="highlight"><pre><span></span><code><span class="n">Switch</span><span class="c1">#show ip route</span>
+<span class="n">Codes</span><span class="p">:</span> <span class="n">L</span> <span class="o">-</span> <span class="n">local</span><span class="p">,</span> <span class="n">C</span> <span class="o">-</span> <span class="n">connected</span><span class="p">,</span> <span class="n">S</span> <span class="o">-</span> <span class="k">static</span><span class="p">,</span> <span class="n">R</span> <span class="o">-</span> <span class="n">RIP</span><span class="p">,</span> <span class="n">M</span> <span class="o">-</span> <span class="n">mobile</span><span class="p">,</span> <span class="n">B</span> <span class="o">-</span> <span class="n">BGP</span>
+       <span class="n">D</span> <span class="o">-</span> <span class="n">EIGRP</span><span class="p">,</span> <span class="n">EX</span> <span class="o">-</span> <span class="n">EIGRP</span> <span class="n">external</span><span class="p">,</span> <span class="n">O</span> <span class="o">-</span> <span class="n">OSPF</span><span class="p">,</span> <span class="n">IA</span> <span class="o">-</span> <span class="n">OSPF</span> <span class="n">inter</span> <span class="n">area</span>
+       <span class="n">N1</span> <span class="o">-</span> <span class="n">OSPF</span> <span class="n">NSSA</span> <span class="n">external</span> <span class="n">type</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N2</span> <span class="o">-</span> <span class="n">OSPF</span> <span class="n">NSSA</span> <span class="n">external</span> <span class="n">type</span> <span class="mi">2</span>
+       <span class="n">E1</span> <span class="o">-</span> <span class="n">OSPF</span> <span class="n">external</span> <span class="n">type</span> <span class="mi">1</span><span class="p">,</span> <span class="n">E2</span> <span class="o">-</span> <span class="n">OSPF</span> <span class="n">external</span> <span class="n">type</span> <span class="mi">2</span>
+       <span class="n">i</span> <span class="o">-</span> <span class="n">IS</span><span class="o">-</span><span class="n">IS</span><span class="p">,</span> <span class="n">su</span> <span class="o">-</span> <span class="n">IS</span><span class="o">-</span><span class="n">IS</span> <span class="n">summary</span><span class="p">,</span> <span class="n">L1</span> <span class="o">-</span> <span class="n">IS</span><span class="o">-</span><span class="n">IS</span> <span class="n">level</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">L2</span> <span class="o">-</span> <span class="n">IS</span><span class="o">-</span><span class="n">IS</span> <span class="n">level</span><span class="o">-</span><span class="mi">2</span>
+       <span class="n">ia</span> <span class="o">-</span> <span class="n">IS</span><span class="o">-</span><span class="n">IS</span> <span class="n">inter</span> <span class="n">area</span><span class="p">,</span> <span class="o">*</span> <span class="o">-</span> <span class="n">candidate</span> <span class="n">default</span><span class="p">,</span> <span class="n">U</span> <span class="o">-</span> <span class="n">per</span><span class="o">-</span><span class="n">user</span> <span class="k">static</span> <span class="n">route</span>
+       <span class="n">o</span> <span class="o">-</span> <span class="n">ODR</span><span class="p">,</span> <span class="n">P</span> <span class="o">-</span> <span class="n">periodic</span> <span class="n">downloaded</span> <span class="k">static</span> <span class="n">route</span><span class="p">,</span> <span class="n">H</span> <span class="o">-</span> <span class="n">NHRP</span><span class="p">,</span> <span class="n">l</span> <span class="o">-</span> <span class="n">LISP</span>
+       <span class="n">a</span> <span class="o">-</span> <span class="n">application</span> <span class="n">route</span>
+       <span class="o">+</span> <span class="o">-</span> <span class="n">replicated</span> <span class="n">route</span><span class="p">,</span> <span class="o">%</span> <span class="o">-</span> <span class="n">next</span> <span class="n">hop</span> <span class="n">override</span>
+
+<span class="n">Gateway</span> <span class="n">of</span> <span class="n">last</span> <span class="n">resort</span> <span class="k">is</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">2.1</span> <span class="n">to</span> <span class="n">network</span> <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span>
+
+<span class="n">S</span><span class="o">*</span>    <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">0</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">0</span><span class="p">]</span> <span class="n">via</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">2.1</span>
+      <span class="mf">192.168</span><span class="o">.</span><span class="mf">2.0</span><span class="o">/</span><span class="mi">24</span> <span class="k">is</span> <span class="n">variably</span> <span class="n">subnetted</span><span class="p">,</span> <span class="mi">2</span> <span class="n">subnets</span><span class="p">,</span> <span class="mi">2</span> <span class="n">masks</span>
+<span class="n">C</span>        <span class="mf">192.168</span><span class="o">.</span><span class="mf">2.0</span><span class="o">/</span><span class="mi">24</span> <span class="k">is</span> <span class="n">directly</span> <span class="n">connected</span><span class="p">,</span> <span class="n">GigabitEthernet0</span><span class="o">/</span><span class="mi">0</span>
+<span class="n">L</span>        <span class="mf">192.168</span><span class="o">.</span><span class="mf">2.100</span><span class="o">/</span><span class="mi">32</span> <span class="k">is</span> <span class="n">directly</span> <span class="n">connected</span><span class="p">,</span> <span class="n">GigabitEthernet0</span><span class="o">/</span><span class="mi">0</span>
+</code></pre></div>
+
+<p>Finally there is <code>ip neigh</code> (equivalent to <code>show ip arp</code>) available
+to query the ARP table of the Linux host:</p>
+<div class="highlight"><pre><span></span><code>$ ip neigh show
+<span class="m">10</span>.0.2.2 dev eth0 lladdr <span class="m">52</span>:54:00:12:35:02 REACHABLE 
+</code></pre></div>
+
+<p>With these simple commands you can already a lot of common
+networking issues on Linux systems I have encountered:
+- Wrongly configured subnet masks
+- Missing (default) routes 
+- Multiple interfaces with traffic using ones you didn't expect
+  they would</p>
+<p>If you take a look at <code>ip help</code> you can see there's a host
+(pun intended) of other commands available for querying:</p>
+<div class="highlight"><pre><span></span><code>$ ip <span class="nb">help</span>
+Usage: ip <span class="o">[</span> OPTIONS <span class="o">]</span> OBJECT <span class="o">{</span> COMMAND <span class="p">|</span> <span class="nb">help</span> <span class="o">}</span>
+       ip <span class="o">[</span> -force <span class="o">]</span> -batch filename
+where  OBJECT :<span class="o">=</span> <span class="o">{</span> link <span class="p">|</span> address <span class="p">|</span> addrlabel <span class="p">|</span> route <span class="p">|</span> rule <span class="p">|</span> neigh <span class="p">|</span> ntable <span class="p">|</span>
+                   tunnel <span class="p">|</span> tuntap <span class="p">|</span> maddress <span class="p">|</span> mroute <span class="p">|</span> mrule <span class="p">|</span> monitor <span class="p">|</span> xfrm <span class="p">|</span>
+                   netns <span class="p">|</span> l2tp <span class="p">|</span> fou <span class="p">|</span> macsec <span class="p">|</span> tcp_metrics <span class="p">|</span> token <span class="p">|</span> netconf <span class="p">|</span> ila <span class="p">|</span>
+                   vrf <span class="p">|</span> sr <span class="p">|</span> nexthop <span class="o">}</span>
+       OPTIONS :<span class="o">=</span> <span class="o">{</span> -V<span class="o">[</span>ersion<span class="o">]</span> <span class="p">|</span> -s<span class="o">[</span>tatistics<span class="o">]</span> <span class="p">|</span> -d<span class="o">[</span>etails<span class="o">]</span> <span class="p">|</span> -r<span class="o">[</span>esolve<span class="o">]</span> <span class="p">|</span>
+                    -h<span class="o">[</span>uman-readable<span class="o">]</span> <span class="p">|</span> -iec <span class="p">|</span> -j<span class="o">[</span>son<span class="o">]</span> <span class="p">|</span> -p<span class="o">[</span>retty<span class="o">]</span> <span class="p">|</span>
+                    -f<span class="o">[</span>amily<span class="o">]</span> <span class="o">{</span> inet <span class="p">|</span> inet6 <span class="p">|</span> mpls <span class="p">|</span> bridge <span class="p">|</span> link <span class="o">}</span> <span class="p">|</span>
+                    -4 <span class="p">|</span> -6 <span class="p">|</span> -I <span class="p">|</span> -D <span class="p">|</span> -M <span class="p">|</span> -B <span class="p">|</span> -0 <span class="p">|</span>
+                    -l<span class="o">[</span>oops<span class="o">]</span> <span class="o">{</span> maximum-addr-flush-attempts <span class="o">}</span> <span class="p">|</span> -br<span class="o">[</span>ief<span class="o">]</span> <span class="p">|</span>
+                    -o<span class="o">[</span>neline<span class="o">]</span> <span class="p">|</span> -t<span class="o">[</span>imestamp<span class="o">]</span> <span class="p">|</span> -ts<span class="o">[</span>hort<span class="o">]</span> <span class="p">|</span> -b<span class="o">[</span>atch<span class="o">]</span> <span class="o">[</span>filename<span class="o">]</span> <span class="p">|</span>
+                    -rc<span class="o">[</span>vbuf<span class="o">]</span> <span class="o">[</span>size<span class="o">]</span> <span class="p">|</span> -n<span class="o">[</span>etns<span class="o">]</span> name <span class="p">|</span> -N<span class="o">[</span>umeric<span class="o">]</span> <span class="p">|</span> -a<span class="o">[</span>ll<span class="o">]</span> <span class="p">|</span>
+                    -c<span class="o">[</span>olor<span class="o">]}</span>
+</code></pre></div>
+
+<p>If you're interested in a good article on the topic of VRFs in
+the Linux world, I recommend you go take a look at
+<a href="https://www.dasblinkenlichten.com/working-with-linux-vrfs/">this article</a>
+by Jon Langemak.</p>
+<h2>Using <code>jq</code> to query JSON output</h2>
+<p>Sometimes you might want to filter the output of the commands
+to get exactly the data you need in the format you need it in.
+Luckily, the <code>ip</code> command supports the outputting of 
+structured data in the form of JSON by virtue of the <code>-j</code> flag:</p>
+<div class="highlight"><pre><span></span><code>$ ip -j route
+<span class="o">[{</span><span class="s2">&quot;dst&quot;</span>:<span class="s2">&quot;default&quot;</span>,<span class="s2">&quot;gateway&quot;</span>:<span class="s2">&quot;10.0.2.2&quot;</span>,<span class="s2">&quot;dev&quot;</span>:<span class="s2">&quot;eth0&quot;</span>,<span class="s2">&quot;protocol&quot;</span>:<span class="s2">&quot;dhcp&quot;</span>,<span class="s2">&quot;prefsrc&quot;</span>:<span class="s2">&quot;10.0.2.15&quot;</span>,<span class="s2">&quot;metric&quot;</span>:100,<span class="s2">&quot;flags&quot;</span>:<span class="o">[]}</span>,<span class="o">{</span><span class="s2">&quot;dst&quot;</span>:<span class="s2">&quot;10.0.2.0/24&quot;</span>,<span class="s2">&quot;dev&quot;</span>:<span class="s2">&quot;eth0&quot;</span>,<span class="s2">&quot;protocol&quot;</span>:<span class="s2">&quot;kernel&quot;</span>,<span class="s2">&quot;scope&quot;</span>:<span class="s2">&quot;link&quot;</span>,<span class="s2">&quot;prefsrc&quot;</span>:<span class="s2">&quot;10.0.2.15&quot;</span>,<span class="s2">&quot;flags&quot;</span>:<span class="o">[]}</span>,<span class="o">{</span><span class="s2">&quot;dst&quot;</span>:<span class="s2">&quot;10.0.2.2&quot;</span>,<span class="s2">&quot;dev&quot;</span>:<span class="s2">&quot;eth0&quot;</span>,<span class="s2">&quot;protocol&quot;</span>:<span class="s2">&quot;dhcp&quot;</span>,<span class="s2">&quot;scope&quot;</span>:<span class="s2">&quot;link&quot;</span>,<span class="s2">&quot;prefsrc&quot;</span>:<span class="s2">&quot;10.0.2.15&quot;</span>,<span class="s2">&quot;metric&quot;</span>:100,<span class="s2">&quot;flags&quot;</span>:<span class="o">[]}]</span>
+</code></pre></div>
+
+<p>That output is not really pretty, is it? Enter: <code>jq</code>.</p>
+<p><em>Note: If you're following along on a brand new VM
+you will at this point have to install the jq tool.
+In the Ubuntu machine you get by using the Vagrantfile
+at the beginning of this post that is done by
+<code>sudo apt install jq -y</code>.</em></p>
+<p><code>jq</code> is a command line JSON processor. In its simplest
+form, we can use it to format the data in a prettier way:</p>
+<div class="highlight"><pre><span></span><code>$ ip -j route <span class="p">|</span> jq
+<span class="o">[</span>
+  <span class="o">{</span>
+    <span class="s2">&quot;dst&quot;</span>: <span class="s2">&quot;default&quot;</span>,
+    <span class="s2">&quot;gateway&quot;</span>: <span class="s2">&quot;10.0.2.2&quot;</span>,
+    <span class="s2">&quot;dev&quot;</span>: <span class="s2">&quot;eth0&quot;</span>,
+    <span class="s2">&quot;protocol&quot;</span>: <span class="s2">&quot;dhcp&quot;</span>,
+    <span class="s2">&quot;prefsrc&quot;</span>: <span class="s2">&quot;10.0.2.15&quot;</span>,
+    <span class="s2">&quot;metric&quot;</span>: <span class="m">100</span>,
+    <span class="s2">&quot;flags&quot;</span>: <span class="o">[]</span>
+  <span class="o">}</span>,
+  <span class="o">{</span>
+    <span class="s2">&quot;dst&quot;</span>: <span class="s2">&quot;10.0.2.0/24&quot;</span>,
+    <span class="s2">&quot;dev&quot;</span>: <span class="s2">&quot;eth0&quot;</span>,
+    <span class="s2">&quot;protocol&quot;</span>: <span class="s2">&quot;kernel&quot;</span>,
+    <span class="s2">&quot;scope&quot;</span>: <span class="s2">&quot;link&quot;</span>,
+    <span class="s2">&quot;prefsrc&quot;</span>: <span class="s2">&quot;10.0.2.15&quot;</span>,
+    <span class="s2">&quot;flags&quot;</span>: <span class="o">[]</span>
+  <span class="o">}</span>,
+  <span class="o">{</span>
+    <span class="s2">&quot;dst&quot;</span>: <span class="s2">&quot;10.0.2.2&quot;</span>,
+    <span class="s2">&quot;dev&quot;</span>: <span class="s2">&quot;eth0&quot;</span>,
+    <span class="s2">&quot;protocol&quot;</span>: <span class="s2">&quot;dhcp&quot;</span>,
+    <span class="s2">&quot;scope&quot;</span>: <span class="s2">&quot;link&quot;</span>,
+    <span class="s2">&quot;prefsrc&quot;</span>: <span class="s2">&quot;10.0.2.15&quot;</span>,
+    <span class="s2">&quot;metric&quot;</span>: <span class="m">100</span>,
+    <span class="s2">&quot;flags&quot;</span>: <span class="o">[]</span>
+  <span class="o">}</span>
+<span class="o">]</span>
+</code></pre></div>
+
+<p>While nicely colored and formatted CLI output is a
+nice-to-have goodie, <code>jq</code> really starts to shine
+once you need to filter data you receive. Say you
+want to find all interfaces that have transmitted
+at least 100000 bytes of traffic and output their
+names, you could use the following command to do
+that:</p>
+<div class="highlight"><pre><span></span><code>$ ip -j -s address <span class="p">|</span> jq <span class="s1">&#39;.[] | select(.stats64.rx.bytes &gt; 100000) | .ifname&#39;</span>
+<span class="s2">&quot;eth0&quot;</span>
+</code></pre></div>
+
+<p>I am aware that this example is somewhat
+removed from what you might need in reality - I'm
+merely using to show of some of what <code>jq</code> can do.
+You could just as well use this command to find
+interfaces with error counters to identify potential
+issues with packet loss.</p>
+<h2>Collecting application level data</h2>
+<p>When troubleshooting networking issues at any point
+it's - in my opinion - always a good idea to start
+at the bottom of the stack. Once you have verified
+that the server has link status and appropriate
+IP addresses as well as routes configured we can start
+to verify if the fault lies with the application itself.
+In order for any network communication to happen, a
+socket has to have been opened on the correct TCP/UPD port.
+The modern way of doing this is with the <code>ss</code> command
+(make sure to run with <code>sudo</code> if you want the process names
+to be output as well):</p>
+<div class="highlight"><pre><span></span><code>$ sudo ss -tulpen
+Netid State  Recv-Q Send-Q Local Address:Port Peer Address:Port Process
+udp   UNCONN <span class="m">0</span>      <span class="m">0</span>      <span class="m">127</span>.0.0.53%lo:53   <span class="m">0</span>.0.0.0:*         users:<span class="o">((</span><span class="s2">&quot;systemd-resolve&quot;</span>,pid<span class="o">=</span><span class="m">520</span>,fd<span class="o">=</span><span class="m">12</span><span class="o">))</span> uid:101 ino:19780 sk:52 &lt;-&gt;
+udp   UNCONN <span class="m">0</span>      <span class="m">0</span>      <span class="m">10</span>.0.2.15%eth0:68  <span class="m">0</span>.0.0.0:*         users:<span class="o">((</span><span class="s2">&quot;systemd-network&quot;</span>,pid<span class="o">=</span><span class="m">379</span>,fd<span class="o">=</span><span class="m">19</span><span class="o">))</span> uid:100 ino:23836 sk:53 &lt;-&gt;
+tcp   LISTEN <span class="m">0</span>      <span class="m">4096</span>   <span class="m">127</span>.0.0.53%lo:53   <span class="m">0</span>.0.0.0:*         users:<span class="o">((</span><span class="s2">&quot;systemd-resolve&quot;</span>,pid<span class="o">=</span><span class="m">520</span>,fd<span class="o">=</span><span class="m">13</span><span class="o">))</span> uid:101 ino:19781 sk:54 &lt;-&gt;
+tcp   LISTEN <span class="m">0</span>      <span class="m">128</span>    <span class="m">0</span>.0.0.0:22         <span class="m">0</span>.0.0.0:*         users:<span class="o">((</span><span class="s2">&quot;sshd&quot;</span>,pid<span class="o">=</span><span class="m">1059</span>,fd<span class="o">=</span><span class="m">3</span><span class="o">))</span> ino:24086 sk:55 &lt;-&gt;
+tcp   LISTEN <span class="m">0</span>      <span class="m">128</span>    <span class="o">[</span>::<span class="o">]</span>:22            <span class="o">[</span>::<span class="o">]</span>:*            users:<span class="o">((</span><span class="s2">&quot;sshd&quot;</span>,pid<span class="o">=</span><span class="m">1059</span>,fd<span class="o">=</span><span class="m">4</span><span class="o">))</span> ino:24088 sk:56 v6only:1 &lt;-&gt;
+</code></pre></div>
+
+<p>This is an overview of all the open sockets (read:
+transport layer ports accepting traffic). You can also
+get a list of open connections using <code>ss</code>:</p>
+<div class="highlight"><pre><span></span><code>$ Netid State Recv-Q Send-Q Local Address:Port Peer Address:Port Process
+tcp     ESTAB <span class="m">0</span>      <span class="m">0</span>      <span class="m">10</span>.0.2.15:ssh      <span class="m">10</span>.0.2.2:35294
+</code></pre></div>
+
+<p>You can for example use this output and match it up with
+firewall logs or packet captures to see if clients
+trying to establishing sessions are successful in doing so.</p>
+<h1>Command mapping table <span id="cheat-sheet"><span></h1>
+<p>Finally, I have compiled a small, cheat-sheet-esque table
+mapping Cisco commands to <code>iproute2</code> commands (with no
+attempt at covering all there is to cover):</p>
+<table>
+<thead>
+<tr>
+<th>Cisco IOS/NXOS</th>
+<th><code>iproute2</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>show ip interface brief</code></td>
+<td><code>ip -br address</code></td>
+</tr>
+<tr>
+<td><code>show interface eth1/1</code></td>
+<td><code>ip -s link show eth0</code></td>
+</tr>
+<tr>
+<td><code>show ip route</code></td>
+<td><code>ip route</code></td>
+</tr>
+<tr>
+<td><code>show ip route 192.0.2.1</code></td>
+<td><code>ip route get 192.0.2.1</code></td>
+</tr>
+<tr>
+<td><code>show ip route | json</code></td>
+<td><code>ip -j route</code></td>
+</tr>
+<tr>
+<td><code>show ip arp</code></td>
+<td><code>ip neigh</code></td>
+</tr>
+<tr>
+<td><code>show ip vrf</code></td>
+<td><code>ip vrf</code></td>
+</tr>
+<tr>
+<td><code>conf t</code>, <code>int eth1/1</code>, <code>shut</code></td>
+<td><code>ip link set eth0 down</code></td>
+</tr>
+<tr>
+<td><code>conf t</code>, <code>int eth1/1</code>, <code>no shut</code></td>
+<td><code>ip link set eth0 up</code></td>
+</tr>
+</tbody>
+</table>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://kircheneer.github.io/blog/tag/cisco.html">cisco</a>
+      <a href="https://kircheneer.github.io/blog/tag/linux.html">linux</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy; 2021 </p>
+<p>
+Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " Kirchnered Networking ",
+  "url" : "https://kircheneer.github.io/blog",
+  "image": "/images/profile.png",
+  "description": ""
+}
+</script>
+
+
+</body>
+</html>
