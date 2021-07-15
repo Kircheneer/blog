@@ -75,7 +75,7 @@ This will do the following things (and therefore might take a little while):
 1. Enable nested virtualization in the Virtualbox settings of the VM
 1. Install pip inside of the box
 1. Add the vagrant user to the libvirt group so we can use libvirt without `sudo`
-1. Install netsim-tools to the system python interpreter
+1. Install `netlab` to the system python interpreter from PyPI
 
 *Note: We are using the system Python interpreter here instead of a
 virtual Python environment. Normally, this would be a bad idea, but because 
@@ -178,7 +178,7 @@ This describes two connected Cisco NXOS with basic OSPF config to ensure
 loopback interface reachability in order for a BGP session to be
 established over those loopback interfaces.
 
-The `create-toplogy` python script defaults to `./topology.yml` as the
+The `netlab create` python script defaults to `./topology.yml` as the
 input and generates the following files as its output:
 - Vagrantfile
 - hosts.yml (Ansible inventory)
@@ -227,20 +227,18 @@ an AMD CPU is used.
 ## Using Ansible with netsim-tools
 
 After your VMs are all set up you can use Ansible to deploy the initial
-configuration (including BGP and OSPF) to the virtual machines. We also
-install Ansible and the paramiko dependency for the NXOS Ansible modules
-into the virtual Python environment so we don't have to switch between
-the virtual environment and the system Python interpreter all the time.
+configuration (including BGP and OSPF) to the virtual machines. The following
+basically command acts as a frontend to `ansible-playbook` running a playbook
+to deploy a specified set of commands in order to configure the configuration
+described in the topology file:
 
 ```bash
-$ ansible-playbook initial-config.ansible
+$ netlab initial
 ```
 
-Since 0.8 the `netlab` CLI also provides a handy shortcut for this
-in the form of `netlab initial`.
-
 Once that's done you can SSH into one of the machines and take a look
-at the routing protocol state:
+at the routing protocol state. `netlab` also provides a handy shorthand for
+this:
 
 ```
 $ netlab connect r1
