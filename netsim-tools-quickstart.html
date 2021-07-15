@@ -121,7 +121,7 @@
       
     <h1 id="netsim-tools-quickstart">A quick introduction to netsim-tools</h1>
     <p>
-      Posted on Thu 13 May 2021 in <a href="https://kircheneer.github.io/blog/category/networking.html">Networking</a>
+      Posted on Do 13 Mai 2021 in <a href="https://kircheneer.github.io/blog/category/networking.html">Networking</a>
 
     </p>
   </header>
@@ -132,7 +132,9 @@
 by <a href="https://www.ipspace.net/Main_Page">Ivan Pepelnjak</a> has been on my "check-this-out" list for a couple of weeks
 now. It contains a set of tools to simplify the process of creating virtual network
 labs. In the following sections I will lay out how to quickly get started with
-labbing on Cisco NXOS 9000v devices using netsim-tools.</p>
+labbing on Cisco NXOS 9000v or Cumulus Linux devices using netsim-tools.</p>
+<p><em>Note: Following the 0.8 release of netsim-tools this post received an update to
+use the pip-way of installing the tools.</em></p>
 <h1>Virtualizing network devices</h1>
 <p>In the past I have mostly used <a href="https://gns3.com/">GNS3</a> for my virtual
 network labbing purposes. While this works quite well, I was a little
@@ -142,12 +144,7 @@ annoyed having to set up the same basic configuration everytime:</p>
 <li>IP addresses on links between the devices</li>
 <li>Routing protocols</li>
 </ol>
-<p>Ivan probably thought something along those lines as well when he created netsim-tools.
-I started my foray into the project by contributing a little
-<a href="https://github.com/ipspace/netsim-tools/blob/master/install.libvirt">Ansible playbook</a>
-that installs the project and its dependencies to a Ubuntu machine
-because I try to keep my testing VMs as cattle in regards to the
-"Pets vs. Cattle" analogy.</p>
+<p>Ivan probably thought something along those lines as well when he created netsim-tools.</p>
 <h2>Vagrantfile for netsim-tools</h2>
 <p>I'm using Vagrant for creating my development environment here. For the
 purposes of this blog post I will assume that you already have Vagrant
@@ -157,29 +154,26 @@ installed. Otherwise, just take a look at the
 Virtualbox as the Vagrant provider from a Windows 10 machine, but thanks
 to the power of Vagrant these instructions should work on any OS.</p>
 <p><em>Note: A prerequisite is a host OS supporting nested virtualization, because
-we will be using KVM isnide of the Vagrant provisioned Ubuntu VM.</em></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># -*- mode: ruby -*-</span>
-<span class="c1"># vi: set ft=ruby :</span>
-
-<span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+we will be using KVM inside of the Vagrant provisioned Ubuntu VM.</em></p>
+<p><em>Note: While I wrote the old version of this Vagrantfile myself, credit for
+the update to the pip-way of installing in this one goes to Ivan!</em></p>
+<div class="highlight"><pre><span></span><code><span class="n">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">)</span> <span class="n">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
   <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;ubuntu/focal64&quot;</span>
 
-  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="s2">&quot;virtualbox&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">vb</span><span class="o">|</span>
-    <span class="n">vb</span><span class="o">.</span><span class="n">memory</span> <span class="o">=</span> <span class="s2">&quot;16384&quot;</span>
-    <span class="n">vb</span><span class="o">.</span><span class="n">cpus</span> <span class="o">=</span> <span class="mi">6</span>
-    <span class="n">vb</span><span class="o">.</span><span class="n">customize</span> <span class="o">[</span><span class="s1">&#39;modifyvm&#39;</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="s1">&#39;--nested-hw-virt&#39;</span><span class="p">,</span> <span class="s1">&#39;on&#39;</span><span class="o">]</span>
-  <span class="k">end</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="s2">&quot;virtualbox&quot;</span> <span class="n">do</span> <span class="o">|</span><span class="n">vb</span><span class="o">|</span>
+    <span class="n">vb</span><span class="o">.</span><span class="n">memory</span> <span class="o">=</span> <span class="s2">&quot;8192&quot;</span>
+    <span class="n">vb</span><span class="o">.</span><span class="n">cpus</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">vb</span><span class="o">.</span><span class="n">customize</span> <span class="p">[</span><span class="s1">&#39;modifyvm&#39;</span><span class="p">,</span> <span class="p">:</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;--nested-hw-virt&#39;</span><span class="p">,</span> <span class="s1">&#39;on&#39;</span><span class="p">]</span>
+  <span class="n">end</span>
 
-  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span> <span class="ss">inline</span><span class="p">:</span> <span class="o">&lt;&lt;-</span><span class="dl">SHELL</span>
-<span class="sh">    apt-get update</span>
-<span class="sh">    apt-get install -y ansible python3-pip</span>
-<span class="sh">    wget https://raw.githubusercontent.com/ipspace/netsim-tools/master/install.libvirt</span>
-<span class="sh">    ansible-playbook install.libvirt</span>
-<span class="sh">    usermod -aG libvirt vagrant</span>
-<span class="sh">    pip install -r /opt/netsim-tools/requirements.txt</span>
-<span class="sh">    pip install paramiko</span>
-<span class="dl">  SHELL</span>
-<span class="k">end</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span> <span class="n">inline</span><span class="p">:</span> <span class="o">&lt;&lt;-</span><span class="n">SHELL</span>
+    <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+    <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">python3</span><span class="o">-</span><span class="n">pip</span>
+    <span class="n">pip3</span> <span class="n">install</span> <span class="n">netsim</span><span class="o">-</span><span class="n">tools</span>
+    <span class="n">netlab</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">ubuntu</span> <span class="n">ansible</span> <span class="n">libvirt</span>
+    <span class="n">usermod</span> <span class="o">-</span><span class="n">aG</span> <span class="n">libvirt</span> <span class="n">vagrant</span>
+  <span class="n">SHELL</span>
+<span class="n">end</span>
 </code></pre></div>
 
 <p>Make sure to adjust the <code>vb.memory</code> and <code>vg.cpus</code> settings to your needs.
@@ -190,22 +184,23 @@ This will do the following things (and therefore might take a little while):</p>
 <ol>
 <li>Download and boot a Ubuntu 20.04 Vagrant box</li>
 <li>Enable nested virtualization in the Virtualbox settings of the VM</li>
-<li>Install Ansible inside of the box</li>
-<li>Use Vagrant provisioning to install netsim-tools to /opt/netsim-tools </li>
-<li>Change the owner of /opt/netsim-tools to the vagrant user</li>
+<li>Install pip inside of the box</li>
 <li>Add the vagrant user to the libvirt group so we can use libvirt without <code>sudo</code></li>
-<li>Install the dependencies of netsim-tools to the system Python interpreter</li>
+<li>Install netsim-tools to the system python interpreter</li>
 </ol>
-<p><em>Note: We are using the system Python interpreter here instead of the
-virtual Python environment the netsim-tools install playbook creates.
-Normally, this would be a bad idea, but because this is a throwaway VM
-we can remove that complexity.</em></p>
-<p>The output of the Ansible playbook should be echoed to the shell running
-<code>vagrant up</code> so if there are any issues during the provisioning you should
-be able to leverage that as debugging information.</p>
+<p><em>Note: We are using the system Python interpreter here instead of a
+virtual Python environment. Normally, this would be a bad idea, but because 
+this is a throwaway VM we can remove that complexity.</em></p>
 <p>Once the machine successfully comes up, you can SSH into it with
 <code>vagrant ssh</code>. All subsequent command line excerpts are from the VM.</p>
 <h2>Readying the NXOS 9000v box for use with netsim-tools</h2>
+<p><em>The following section describes how to ready a Cisco NXOS
+9000v box for virtual labbing. If you aren't set on a vendor
+I recommend you check out
+<a href="https://www.nvidia.com/en-us/networking/ethernet-switching/cumulus-linux/">Cumulus Linux</a>
+as they provide the most-hassle free Vagrant box experience
+(it's available on the public Vagrant registry!). Just use the
+OS "cumulus" inside of the topology file further down.</em></p>
 <p>Netsim-tools provides tools to perform the following tasks:</p>
 <ul>
 <li>Automate file creation based on a simple topology file for<ul>
@@ -257,8 +252,11 @@ the box folder <code>~/.vagrant.d/boxes/cisco-VAGRANTSLASH-nexus9300v</code> bac
 the actual nodes to be provisioned, links between the nodes,
 any modules to be deployed onto the nodes and finally configuration
 for those modules.</p>
-<p>Copy the content of the following topology file into
-<code>/opt/netsim-tools/topology.yml</code>.</p>
+<p>Copy the content of the following topology file into any folder inside of
+the box, for the purposes of this tutorial I will be using the home folder.</p>
+<p><em>Note: As mentioned above, if you skipped the NXOS 9000v part you can use
+"cumulus" as the device type here and it will just work without
+any further preparation.</em></p>
 <div class="highlight"><pre><span></span><code><span class="nt">module</span><span class="p">:</span> <span class="p p-Indicator">[</span> <span class="nv">bgp</span><span class="p p-Indicator">,</span> <span class="nv">ospf</span> <span class="p p-Indicator">]</span>
 
 <span class="nt">bgp</span><span class="p">:</span>
@@ -282,8 +280,9 @@ input and generates the following files as its output:
 - Vagrantfile
 - hosts.yml (Ansible inventory)
 - ansible.cfg</p>
-<div class="highlight"><pre><span></span><code>$ <span class="nb">cd</span> /opt/netsim-tools
-$ ./create-topology -g -i -c
+<div class="highlight"><pre><span></span><code>$ ls
+topology.yml
+$ netlab create
 Created provider configuration file: Vagrantfile
 Created group_vars <span class="k">for</span> nxos
 Created host_vars <span class="k">for</span> r1
@@ -321,14 +320,14 @@ configuration (including BGP and OSPF) to the virtual machines. We also
 install Ansible and the paramiko dependency for the NXOS Ansible modules
 into the virtual Python environment so we don't have to switch between
 the virtual environment and the system Python interpreter all the time.</p>
-<div class="highlight"><pre><span></span><code>$ <span class="nb">cd</span> /opt/netsim-tools
-$ deactivate  <span class="c1"># Ensure deactivation of the virtual environment</span>
-$ ansible-playbook initial-config.ansible --ssh-extra-args<span class="o">=</span><span class="s1">&#39;-o &quot;StrictHostKeyChecking=no&quot;&#39;</span>
+<div class="highlight"><pre><span></span><code>$ ansible-playbook initial-config.ansible
 </code></pre></div>
 
+<p>Since 0.8 the <code>netlab</code> CLI also provides a handy shortcut for this
+in the form of <code>netlab initial</code>.</p>
 <p>Once that's done you can SSH into one of the machines and take a look
 at the routing protocol state:</p>
-<div class="highlight"><pre><span></span><code>$ ./connect.sh r1
+<div class="highlight"><pre><span></span><code>$ netlab connect r1
 <span class="o">[</span>...<span class="o">]</span>
 r1# sh ip ospf neighbors
  OSPF Process ID <span class="m">1</span> VRF default
@@ -358,14 +357,15 @@ IP Route Table <span class="k">for</span> VRF <span class="s2">&quot;default&quo
 <p>As you can see at this point the routing protocol neighborships
 have been successfully established.</p>
 <p>Apart from deploying pre-baked initial configurations we can also use the
-<code>config.ansible</code> playbook to deploy our own custom configuration templates
+<code>netlab config</code> command to deploy our own custom configuration templates
 to the devices as follows:</p>
 <div class="highlight"><pre><span></span><code>$ <span class="nb">echo</span> <span class="s2">&quot;no feature telnet&quot;</span> &gt; config.j2
-$ ansible-playbook config.ansible -e <span class="nv">config</span><span class="o">=</span>config
+$ netlab config config.j2
 </code></pre></div>
 
-<p>You can of course get more complex with those templates rather than merely
-disabling telnet.</p>
+<p>Note that all this passes every argument except for the first one verbatim
+to <code>ansible-playbook</code>, which allows you to control its behavior. You can of
+course get more complex with those templates rather than merely disabling telnet.</p>
 <h2>Conclusion</h2>
 <p>In this blog post I demonstrated how to use Vagrant, netsim-tools and Linux
 to build a virtual network lab. I personally feel like the instant Ansible
