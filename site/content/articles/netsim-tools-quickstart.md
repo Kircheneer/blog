@@ -10,7 +10,10 @@ The somewhat newly released [netsim-tools](https://github.com/ipspace/netsim-too
 by [Ivan Pepelnjak](https://www.ipspace.net/Main_Page) has been on my "check-this-out" list for a couple of weeks
 now. It contains a set of tools to simplify the process of creating virtual network
 labs. In the following sections I will lay out how to quickly get started with
-labbing on Cisco NXOS 9000v devices using netsim-tools.
+labbing on Cisco NXOS 9000v or Cumulus Linux devices using netsim-tools.
+
+*Note: Following the 0.8 release of netsim-tools this post received an update to
+use the pip-way of installing the tools.*
 
 # Virtualizing network devices
 
@@ -23,13 +26,6 @@ annoyed having to set up the same basic configuration everytime:
 1. Routing protocols
 
 Ivan probably thought something along those lines as well when he created netsim-tools.
-I started my foray into the project by contributing a little
-[Ansible playbook](https://github.com/ipspace/netsim-tools/blob/master/install.libvirt)
-that installs the project and its dependencies to a Ubuntu machine
-because I try to keep my testing VMs as cattle in regards to the
-"Pets vs. Cattle" analogy.
-
-
 
 ## Vagrantfile for netsim-tools
 
@@ -43,29 +39,27 @@ Virtualbox as the Vagrant provider from a Windows 10 machine, but thanks
 to the power of Vagrant these instructions should work on any OS.
 
 *Note: A prerequisite is a host OS supporting nested virtualization, because
-we will be using KVM isnide of the Vagrant provisioned Ubuntu VM.*
+we will be using KVM inside of the Vagrant provisioned Ubuntu VM.*
+
+*Note: While I wrote the old version of this Vagrantfile myself, credit for
+the update to the pip-way of installing in this one goes to Ivan!*
 
 ```Vagrantfile
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
 
   config.vm.provider "virtualbox" do |vb|
-    vb.memory = "16384"
-    vb.cpus = 6
+    vb.memory = "8192"
+    vb.cpus = 4
     vb.customize ['modifyvm', :id, '--nested-hw-virt', 'on']
   end
 
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
-    apt-get install -y ansible python3-pip
-    wget https://raw.githubusercontent.com/ipspace/netsim-tools/master/install.libvirt
-    ansible-playbook install.libvirt
+    apt-get install -y python3-pip
+    pip3 install netsim-tools
+    netlab install -y ubuntu ansible libvirt
     usermod -aG libvirt vagrant
-    pip install -r /opt/netsim-tools/requirements.txt
-    pip install paramiko
   SHELL
 end
 ```
@@ -79,25 +73,26 @@ This will do the following things (and therefore might take a little while):
 
 1. Download and boot a Ubuntu 20.04 Vagrant box
 1. Enable nested virtualization in the Virtualbox settings of the VM
-1. Install Ansible inside of the box
-1. Use Vagrant provisioning to install netsim-tools to /opt/netsim-tools 
-1. Change the owner of /opt/netsim-tools to the vagrant user
+1. Install pip inside of the box
 1. Add the vagrant user to the libvirt group so we can use libvirt without `sudo`
-1. Install the dependencies of netsim-tools to the system Python interpreter
+1. Install netsim-tools to the system python interpreter
 
-*Note: We are using the system Python interpreter here instead of the
-virtual Python environment the netsim-tools install playbook creates.
-Normally, this would be a bad idea, but because this is a throwaway VM
-we can remove that complexity.*
-
-The output of the Ansible playbook should be echoed to the shell running
-`vagrant up` so if there are any issues during the provisioning you should
-be able to leverage that as debugging information.
+*Note: We are using the system Python interpreter here instead of a
+virtual Python environment. Normally, this would be a bad idea, but because 
+this is a throwaway VM we can remove that complexity.*
 
 Once the machine successfully comes up, you can SSH into it with
 `vagrant ssh`. All subsequent command line excerpts are from the VM.
 
 ## Readying the NXOS 9000v box for use with netsim-tools
+
+*The following section describes how to ready a Cisco NXOS
+9000v box for virtual labbing. If you aren't set on a vendor
+I recommend you check out
+[Cumulus Linux](https://www.nvidia.com/en-us/networking/ethernet-switching/cumulus-linux/)
+as they provide the most-hassle free Vagrant box experience
+(it's available on the public Vagrant registry!). Just use the
+OS "cumulus" inside of the topology file further down.*
 
 Netsim-tools provides tools to perform the following tasks:
 
@@ -156,8 +151,12 @@ the actual nodes to be provisioned, links between the nodes,
 any modules to be deployed onto the nodes and finally configuration
 for those modules.
 
-Copy the content of the following topology file into
-`/opt/netsim-tools/topology.yml`.
+Copy the content of the following topology file into any folder inside of
+the box, for the purposes of this tutorial I will be using the home folder.
+
+*Note: As mentioned above, if you skipped the NXOS 9000v part you can use
+"cumulus" as the device type here and it will just work without
+any further preparation.*
 
 ```yaml
 module: [ bgp, ospf ]
@@ -186,8 +185,9 @@ input and generates the following files as its output:
 - ansible.cfg
 
 ```bash
-$ cd /opt/netsim-tools
-$ ./create-topology -g -i -c
+$ ls
+topology.yml
+$ netlab create
 Created provider configuration file: Vagrantfile
 Created group_vars for nxos
 Created host_vars for r1
@@ -233,16 +233,17 @@ into the virtual Python environment so we don't have to switch between
 the virtual environment and the system Python interpreter all the time.
 
 ```bash
-$ cd /opt/netsim-tools
-$ deactivate  # Ensure deactivation of the virtual environment
-$ ansible-playbook initial-config.ansible --ssh-extra-args='-o "StrictHostKeyChecking=no"'
+$ ansible-playbook initial-config.ansible
 ```
+
+Since 0.8 the `netlab` CLI also provides a handy shortcut for this
+in the form of `netlab initial`.
 
 Once that's done you can SSH into one of the machines and take a look
 at the routing protocol state:
 
 ```
-$ ./connect.sh r1
+$ netlab connect r1
 [...]
 r1# sh ip ospf neighbors
  OSPF Process ID 1 VRF default
@@ -273,16 +274,17 @@ As you can see at this point the routing protocol neighborships
 have been successfully established.
 
 Apart from deploying pre-baked initial configurations we can also use the
-`config.ansible` playbook to deploy our own custom configuration templates
+`netlab config` command to deploy our own custom configuration templates
 to the devices as follows:
 
 ```
 $ echo "no feature telnet" > config.j2
-$ ansible-playbook config.ansible -e config=config
+$ netlab config config.j2
 ```
 
-You can of course get more complex with those templates rather than merely
-disabling telnet.
+Note that all this passes every argument except for the first one verbatim
+to `ansible-playbook`, which allows you to control its behavior. You can of
+course get more complex with those templates rather than merely disabling telnet.
 
 ## Conclusion
 
