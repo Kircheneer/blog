@@ -37,5 +37,4 @@ EXTRA_PATH_METADATA = {
     "extra/CNAME": {"path": "CNAME"},
     ".nojekyll": {"path": ".nojekyll"},
 }
-GOOGLE_ANALYTICS = "UA-183762699-1"
 COPYRIGHT_YEAR = 2022
