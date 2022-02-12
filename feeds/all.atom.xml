@@ -1,5 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kirchnered Networking</title><link href="https://blog.kirchne.red/" rel="alternate"></link><link href="https://blog.kirchne.red/feeds/all.atom.xml" rel="self"></link><id>https://blog.kirchne.red/</id><updated>2021-05-22T16:00:00+02:00</updated><subtitle>Network Automation Engineer</subtitle><entry><title>Linux Networking for the Cisco Admin</title><link href="https://blog.kirchne.red/linux-networking-for-the-cisco-admin.html" rel="alternate"></link><published>2021-05-22T16:00:00+02:00</published><updated>2021-05-22T16:00:00+02:00</updated><author><name>kirchnerl</name></author><id>tag:blog.kirchne.red,2021-05-22:/linux-networking-for-the-cisco-admin.html</id><summary type="html">&lt;p&gt;If your job as a network administrator is anything like mine then
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kirchnered Networking</title><link href="https://blog.kirchne.red/" rel="alternate"></link><link href="https://blog.kirchne.red/feeds/all.atom.xml" rel="self"></link><id>https://blog.kirchne.red/</id><updated>2022-02-12T00:00:00+01:00</updated><subtitle>Network Automation Engineer</subtitle><entry><title>Adding type hint support to NAPALM</title><link href="https://blog.kirchne.red/type-hinting-napalm.html" rel="alternate"></link><published>2022-02-12T00:00:00+01:00</published><updated>2022-02-12T00:00:00+01:00</updated><author><name>kirchnerl</name></author><id>tag:blog.kirchne.red,2022-02-12:/type-hinting-napalm.html</id><summary type="html">&lt;p&gt;Over the past year I have been working on adding type hinting (see
+&lt;a href="https://www.python.org/dev/peps/pep-0484/" title="https://www.python.org/dev/peps/pep-0484/"&gt;PEP484&lt;/a&gt;) to the Network
+Automation and Programmability Abstraction Layer with Multivendor support python library
+(&lt;a href="https://napalm.readthedocs.io/en/latest/" title="https://napalm.readthedocs.io/en/latest/"&gt;NAPALM&lt;/a&gt;). Type hinting is still
+only used in a subset of all python libraries, so I thought it might be interesting to elaborate …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Over the past year I have been working on adding type hinting (see
+&lt;a href="https://www.python.org/dev/peps/pep-0484/" title="https://www.python.org/dev/peps/pep-0484/"&gt;PEP484&lt;/a&gt;) to the Network
+Automation and Programmability Abstraction Layer with Multivendor support python library
+(&lt;a href="https://napalm.readthedocs.io/en/latest/" title="https://napalm.readthedocs.io/en/latest/"&gt;NAPALM&lt;/a&gt;). Type hinting is still
+only used in a subset of all python libraries, so I thought it might be interesting to elaborate on the process.
+Type hints in combination with a type checker such as &lt;a href="http://mypy-lang.org/" title="http://mypy-lang.org/"&gt;Mypy&lt;/a&gt; allow for
+static analysis of Python programs. The following code is a example of a type hinted function:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;sum_and_multiply&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;typing&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Sum the integers in a and multiply them by b.&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;To start off I decided to only tackle the &lt;code&gt;NXOS&lt;/code&gt; driver and the base &lt;code&gt;NetworkDriver&lt;/code&gt; class. Type hinting all
+the available drivers seemed like too big of a problem to tackle right of the bat.&lt;/p&gt;
+&lt;h2&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;Running Mypy against the submodule &lt;code&gt;napalm.base&lt;/code&gt; with the &lt;code&gt;disallow-untyped-defs&lt;/code&gt; flag yielded more than 600 errors
+before I added any type annotations.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;$&lt;/span&gt; &lt;span class="n"&gt;mypy&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="n"&gt;napalm&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;base&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;disallow&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;untyped&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;defs&lt;/span&gt;
+&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;Found&lt;/span&gt; &lt;span class="mi"&gt;655&lt;/span&gt; &lt;span class="n"&gt;errors&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="mi"&gt;34&lt;/span&gt; &lt;span class="n"&gt;files&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;checked&lt;/span&gt; &lt;span class="mi"&gt;25&lt;/span&gt; &lt;span class="n"&gt;source&lt;/span&gt; &lt;span class="n"&gt;files&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;These mostly consist of untyped function or method definitions. Another common error is an import that doesn't implement
+type hints. At the time of writing, not a lot of dependencies of NAPALM implement type hints.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;--disallow-untyped-defs&lt;/code&gt; flag for &lt;code&gt;mypy&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;"reports an error whenever it encounters a function definition without type annotations"&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;(see &lt;a href="https://mypy.readthedocs.io/en/stable/command_line.html#untyped-definitions-and-calls"&gt;here&lt;/a&gt;).
+This allows for pretty good type checking coverage because all affected functions and methods from the checked modules
+have to have type annotations.&lt;/p&gt;
+&lt;h2&gt;Getting started with type annotations&lt;/h2&gt;
+&lt;p&gt;I found my starting point in type hinting the codebase in the models used for testing the
+&lt;a href="https://napalm.readthedocs.io/en/latest/support/index.html#getters-support-matrix" title="https://napalm.readthedocs.io/en/latest/support/index.html#getters-support-matrix"&gt;getter methods&lt;/a&gt;,
+which are NAPALMs way of (vendor-independently) getting data from network devices in a common form. The following is an
+excerpt from &lt;code&gt;napalm.base.test.models&lt;/code&gt; showing the model that &lt;code&gt;get_facts&lt;/code&gt; is tested against before any work towards
+type hints was done.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;facts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;os_version&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;uptime&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;interface_list&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;vendor&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;serial_number&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;model&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;hostname&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;fqdn&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;All the models were present in this format, which allows the unit tests to check, if the getter output data conforms to
+this format. The following, however, isn't possible with this format:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;ExampleDriver&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get_facts&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;facts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;pass&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is because the dictionary doesn't have the field &lt;code&gt;__annotations__&lt;/code&gt;, which is what Mypy evaluates.
+The &lt;code&gt;typing&lt;/code&gt; module (or the &lt;code&gt;typing_extensions&lt;/code&gt; module before Python 3.7) provides a Type called
+&lt;code&gt;TypedDict&lt;/code&gt; (see &lt;a href="https://www.python.org/dev/peps/pep-0589/"&gt;PEP589&lt;/a&gt;) to solve this. This type also allows for more
+granularity than the standard &lt;code&gt;Dict&lt;/code&gt; annotation. A &lt;code&gt;TypedDict&lt;/code&gt; for the above model could look like this (using the
+alternative syntax for ease of migration).&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;typing&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;TypedDict&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;List&lt;/span&gt;
+
+&lt;span class="n"&gt;FactsDict&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;TypedDict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;FactsDict&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;os_version&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;uptime&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;interface_list&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;vendor&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;serial_number&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;model&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;hostname&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;fqdn&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="p"&gt;},&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Note that not much has actually changed here, but it's now possible to use this type in type hints for the &lt;code&gt;get_facts&lt;/code&gt; 
+function from earlier.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;ExampleDriver&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get_facts&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Facts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;pass&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2&gt;Type hinting the NetworkDriver&lt;/h2&gt;
+&lt;p&gt;With most of the data modeling out of the way, the next step was putting in the actual type hints. Any NAPALM driver (in
+the core module or a 3rd party one) has to inherit the &lt;code&gt;NetworkDriver&lt;/code&gt; class from &lt;code&gt;napalm.base.base&lt;/code&gt;. This therefore
+looked like a great starting point for adding type hints. After all the models were converted to &lt;code&gt;TypedDict&lt;/code&gt; instances,
+I was able to annotate a lot of the methods with just those models. While type hinting the code base further I found I
+had made a lot of errors with the models I made in the first step. I gradually iterated on those until they worked for
+both the NXOS SSH and NXAPI drivers.&lt;/p&gt;
+&lt;h2&gt;Bugs found&lt;/h2&gt;
+&lt;p&gt;Over the course of the &lt;a href="https://www.nanog.org/events/nanog-84-hackathon/"&gt;NANOG 84 Hackathon&lt;/a&gt; I added the last couple of
+finishing touches to the &lt;a href="https://github.com/napalm-automation/napalm/pull/1476"&gt;Pull Request&lt;/a&gt; corresponding to this
+blog post. While going through that I did find the only straight-up bug in NAPALM that Mypy was able to uncover over the
+course of this process. This was a broken import in an if-branch that the unit tests didn't cover. While this (probably)
+never caused any problems in the wild, it's still good to know that the bug is fixed with the next release.&lt;/p&gt;
+&lt;p&gt;More importantly though any bugs of the same nature will be detected by the CI pipeline, which now runs Mypy on every
+commit that's added to the NAPALM repository.&lt;/p&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Finally, I can say that this was a fantastic learning experience not only for Python type hinting, but also for the
+NAPALM library itself. Adding all the relevant type hints lead me to parts of the codebase I hadn't seen yet and
+therefore improved my understanding of the software. If you are looking for a Python project to do: Take a
+look whether your favorite or most-used Python libraries have implemented type hinting and volunteer to do so if they
+don't. You can check this by just type hinting your own code - Mypy will complain whenever you import code without type
+hints. Maybe you are even interested in adding type hints to NAPALM itself, as of Feb 12 2022 only the NXOS driver and
+the Base driver have type hints in them.&lt;/p&gt;
+&lt;p&gt;Fun-fact: The &lt;a href="https://github.com/nornir-automation/nornir"&gt;Nornir&lt;/a&gt; framework had type hints everywhere but
+didn't have a &lt;code&gt;py.typed&lt;/code&gt; file at the module root. This meant that even though type hints were there, Mypy didn't pick up
+upon those until said file was added - this is included in release &lt;code&gt;v3.1.0&lt;/code&gt;. &lt;/p&gt;</content><category term="Programming"></category><category term="Mypy"></category><category term="NAPALM"></category><category term="Python"></category></entry><entry><title>Linux Networking for the Cisco Admin</title><link href="https://blog.kirchne.red/linux-networking-for-the-cisco-admin.html" rel="alternate"></link><published>2021-05-22T16:00:00+02:00</published><updated>2021-05-22T16:00:00+02:00</updated><author><name>kirchnerl</name></author><id>tag:blog.kirchne.red,2021-05-22:/linux-networking-for-the-cisco-admin.html</id><summary type="html">&lt;p&gt;If your job as a network administrator is anything like mine then
 you often get pulled somewhat out of your comfort zone by supposed
 network issues in end hosts. Some of the problems I've had to deal
 with in this regard are the following:&lt;/p&gt;

@@ -28,7 +28,17 @@
     <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 
+<!-- Google Analytics -->
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
+  ga('create', 'UA-183762699-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
     <!-- Chrome, Firefox OS and Opera -->
     <meta name="theme-color" content="#333">
     <!-- Windows Phone -->
@@ -40,17 +50,17 @@
     <meta name="msapplication-TileColor" content="#333">
 
 <meta name="author" content="kirchnerl" />
-<meta name="description" content="Recently I&#39;ve been working on adding type hints (see PEP484) to the Network Automation and Programmability Abstraction Layer with Multivendor support (NAPALM). This was my first more-or-less major open source contribution so I though it might be interesting to elaborate on the process. Type hints in combination with a type …" />
+<meta name="description" content="Over the past year I have been working on adding type hinting (see PEP484) to the Network Automation and Programmability Abstraction Layer with Multivendor support python library (NAPALM). Type hinting is still only used in a subset of all python libraries, so I thought it might be interesting to elaborate …" />
 <meta name="keywords" content="Mypy, NAPALM, Python">
 
 
 <meta property="og:site_name" content="Kirchnered Networking"/>
 <meta property="og:title" content="Adding type hint support to NAPALM"/>
-<meta property="og:description" content="Recently I&#39;ve been working on adding type hints (see PEP484) to the Network Automation and Programmability Abstraction Layer with Multivendor support (NAPALM). This was my first more-or-less major open source contribution so I though it might be interesting to elaborate on the process. Type hints in combination with a type …"/>
+<meta property="og:description" content="Over the past year I have been working on adding type hinting (see PEP484) to the Network Automation and Programmability Abstraction Layer with Multivendor support python library (NAPALM). Type hinting is still only used in a subset of all python libraries, so I thought it might be interesting to elaborate …"/>
 <meta property="og:locale" content="en_US"/>
-<meta property="og:url" content="https://blog.kirchne.red/drafts/84.html"/>
+<meta property="og:url" content="https://blog.kirchne.red/type-hinting-napalm.html"/>
 <meta property="og:type" content="article"/>
-<meta property="article:published_time" content="2021-03-27 19:20:00+01:00"/>
+<meta property="article:published_time" content="2022-02-12 00:00:00+01:00"/>
 <meta property="article:modified_time" content=""/>
 <meta property="article:author" content="https://blog.kirchne.red/author/kirchnerl.html">
 <meta property="article:section" content="Programming"/>
@@ -107,41 +117,50 @@
 <article class="single">
   <header>
       
-    <h1 id="84">Adding type hint support to NAPALM</h1>
+    <h1 id="type-hinting-napalm">Adding type hint support to NAPALM</h1>
     <p>
-      Posted on Sa 27 März 2021 in <a href="https://blog.kirchne.red/category/programming.html">Programming</a>
+      Posted on Sa 12 Februar 2022 in <a href="https://blog.kirchne.red/category/programming.html">Programming</a>
 
     </p>
   </header>
 
 
   <div>
-    <p>Recently I've been working on adding type hints (see
+    <p>Over the past year I have been working on adding type hinting (see
 <a href="https://www.python.org/dev/peps/pep-0484/" title="https://www.python.org/dev/peps/pep-0484/">PEP484</a>) to the Network
-Automation and Programmability Abstraction Layer with Multivendor support
-(<a href="https://napalm.readthedocs.io/en/latest/" title="https://napalm.readthedocs.io/en/latest/">NAPALM</a>). This was my first
-more-or-less major open source contribution so I though it might be interesting to elaborate on the process. Type hints
-in combination with a type checker such as <a href="http://mypy-lang.org/" title="http://mypy-lang.org/">Mypy</a> allow for static
-analysis of Python programs (which are normally dynamically typed). The following code is a example of a type hinted
-function.</p>
+Automation and Programmability Abstraction Layer with Multivendor support python library
+(<a href="https://napalm.readthedocs.io/en/latest/" title="https://napalm.readthedocs.io/en/latest/">NAPALM</a>). Type hinting is still
+only used in a subset of all python libraries, so I thought it might be interesting to elaborate on the process.
+Type hints in combination with a type checker such as <a href="http://mypy-lang.org/" title="http://mypy-lang.org/">Mypy</a> allow for
+static analysis of Python programs. The following code is a example of a type hinted function:</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">sum_and_multiply</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Sum the integers in a and multiply them by b.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">b</span>
 </code></pre></div>
 
-<p>To start off I decided to only tackle the <code>NXOS</code> driver and the base <code>NetworkDriver</code> class, because type hinting all of the</p>
+<p>To start off I decided to only tackle the <code>NXOS</code> driver and the base <code>NetworkDriver</code> class. Type hinting all
+the available drivers seemed like too big of a problem to tackle right of the bat.</p>
 <h2>Prerequisites</h2>
 <p>Running Mypy against the submodule <code>napalm.base</code> with the <code>disallow-untyped-defs</code> flag yielded more than 600 errors
-prior to the changes I made.</p>
+before I added any type annotations.</p>
 <div class="highlight"><pre><span></span><code><span class="err">$</span> <span class="n">mypy</span> <span class="o">-</span><span class="n">p</span> <span class="n">napalm</span><span class="o">.</span><span class="n">base</span> <span class="o">--</span><span class="n">disallow</span><span class="o">-</span><span class="n">untyped</span><span class="o">-</span><span class="n">defs</span>
 <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 <span class="n">Found</span> <span class="mi">655</span> <span class="n">errors</span> <span class="ow">in</span> <span class="mi">34</span> <span class="n">files</span> <span class="p">(</span><span class="n">checked</span> <span class="mi">25</span> <span class="n">source</span> <span class="n">files</span><span class="p">)</span>
 </code></pre></div>
 
 <p>These mostly consist of untyped function or method definitions. Another common error is an import that doesn't implement
-type hints. At the time of writing, not a lot of dependencies of NAPALM implement type hints. I found my starting point
-in all of this in the models used for testing the
+type hints. At the time of writing, not a lot of dependencies of NAPALM implement type hints.</p>
+<p>The <code>--disallow-untyped-defs</code> flag for <code>mypy</code></p>
+<blockquote>
+<p>"reports an error whenever it encounters a function definition without type annotations"</p>
+</blockquote>
+<p>(see <a href="https://mypy.readthedocs.io/en/stable/command_line.html#untyped-definitions-and-calls">here</a>).
+This allows for pretty good type checking coverage because all affected functions and methods from the checked modules
+have to have type annotations.</p>
+<h2>Getting started with type annotations</h2>
+<p>I found my starting point in type hinting the codebase in the models used for testing the
 <a href="https://napalm.readthedocs.io/en/latest/support/index.html#getters-support-matrix" title="https://napalm.readthedocs.io/en/latest/support/index.html#getters-support-matrix">getter methods</a>,
-which are NAPALMs way of (vendor-independantly) getting data from network devices in a common form. The following is an
+which are NAPALMs way of (vendor-independently) getting data from network devices in a common form. The following is an
 excerpt from <code>napalm.base.test.models</code> showing the model that <code>get_facts</code> is tested against before any work towards
 type hints was done.</p>
 <div class="highlight"><pre><span></span><code><span class="n">facts</span> <span class="o">=</span> <span class="p">{</span>
@@ -157,17 +176,20 @@ type hints was done.</p>
 </code></pre></div>
 
 <p>All the models were present in this format, which allows the unit tests to check, if the getter output data conforms to
-this format. Unfortunately, the following is not possible with this format:</p>
+this format. The following, however, isn't possible with this format:</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ExampleDriver</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">get_facts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">facts</span><span class="p">:</span>
         <span class="k">pass</span>
 </code></pre></div>
 
-<p>Fortunately though, the <code>typing</code> module (or the <code>typing_extensions</code> module prior to Python 3.7) provides a Type called
-<code>TypedDict</code> (see <a href="https://www.python.org/dev/peps/pep-0589/">PEP589</a>). This allows for more granularity than the
-standard <code>Dict</code> annotation, which allows generic keys in the dictionary. A <code>TypedDict</code> for the above model could look
-like this (using the alternative syntax for ease of migration).</p>
-<div class="highlight"><pre><span></span><code><span class="n">FactsDict</span> <span class="o">=</span> <span class="n">TypedDict</span><span class="p">(</span>
+<p>This is because the dictionary doesn't have the field <code>__annotations__</code>, which is what Mypy evaluates.
+The <code>typing</code> module (or the <code>typing_extensions</code> module before Python 3.7) provides a Type called
+<code>TypedDict</code> (see <a href="https://www.python.org/dev/peps/pep-0589/">PEP589</a>) to solve this. This type also allows for more
+granularity than the standard <code>Dict</code> annotation. A <code>TypedDict</code> for the above model could look like this (using the
+alternative syntax for ease of migration).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="n">FactsDict</span> <span class="o">=</span> <span class="n">TypedDict</span><span class="p">(</span>
     <span class="s2">&quot;FactsDict&quot;</span><span class="p">,</span>
     <span class="p">{</span>
         <span class="s2">&quot;os_version&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -182,20 +204,39 @@ like this (using the alternative syntax for ease of migration).</p>
 <span class="p">)</span>
 </code></pre></div>
 
-<p>Note that not much has actually changed here, but we can now use this type in type hints for our <code>get_facts</code> function
-from earlier.</p>
+<p>Note that not much has actually changed here, but it's now possible to use this type in type hints for the <code>get_facts</code> 
+function from earlier.</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ExampleDriver</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">get_facts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Facts</span><span class="p">:</span>
         <span class="k">pass</span>
 </code></pre></div>
 
-<h2>Type hinting the base class</h2>
-<p>With most of the data modeling out of the the next step was putting in the actual type hints. Any NAPALM driver (in
+<h2>Type hinting the NetworkDriver</h2>
+<p>With most of the data modeling out of the way, the next step was putting in the actual type hints. Any NAPALM driver (in
 the core module or a 3rd party one) has to inherit the <code>NetworkDriver</code> class from <code>napalm.base.base</code>. This therefore
 looked like a great starting point for adding type hints. After all the models were converted to <code>TypedDict</code> instances,
-I was able to annotate a lot of the methods with just those models. While type hinting the code base further I found
-lots of errors with the models I made in the first step so I gradually iterated on those until they worked for both the
-NXOS SSH and NXAPI drivers</p>
+I was able to annotate a lot of the methods with just those models. While type hinting the code base further I found I
+had made a lot of errors with the models I made in the first step. I gradually iterated on those until they worked for
+both the NXOS SSH and NXAPI drivers.</p>
+<h2>Bugs found</h2>
+<p>Over the course of the <a href="https://www.nanog.org/events/nanog-84-hackathon/">NANOG 84 Hackathon</a> I added the last couple of
+finishing touches to the <a href="https://github.com/napalm-automation/napalm/pull/1476">Pull Request</a> corresponding to this
+blog post. While going through that I did find the only straight-up bug in NAPALM that Mypy was able to uncover over the
+course of this process. This was a broken import in an if-branch that the unit tests didn't cover. While this (probably)
+never caused any problems in the wild, it's still good to know that the bug is fixed with the next release.</p>
+<p>More importantly though any bugs of the same nature will be detected by the CI pipeline, which now runs Mypy on every
+commit that's added to the NAPALM repository.</p>
+<h2>Conclusion</h2>
+<p>Finally, I can say that this was a fantastic learning experience not only for Python type hinting, but also for the
+NAPALM library itself. Adding all the relevant type hints lead me to parts of the codebase I hadn't seen yet and
+therefore improved my understanding of the software. If you are looking for a Python project to do: Take a
+look whether your favorite or most-used Python libraries have implemented type hinting and volunteer to do so if they
+don't. You can check this by just type hinting your own code - Mypy will complain whenever you import code without type
+hints. Maybe you are even interested in adding type hints to NAPALM itself, as of Feb 12 2022 only the NXOS driver and
+the Base driver have type hints in them.</p>
+<p>Fun-fact: The <a href="https://github.com/nornir-automation/nornir">Nornir</a> framework had type hints everywhere but
+didn't have a <code>py.typed</code> file at the module root. This meant that even though type hints were there, Mypy didn't pick up
+upon those until said file was added - this is included in release <code>v3.1.0</code>. </p>
   </div>
   <div class="tag-cloud">
     <p>
