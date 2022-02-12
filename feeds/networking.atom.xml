@@ -18,7 +18,7 @@ with in this regard are the following:&lt;/p&gt;
 &lt;/ul&gt;
 &lt;p&gt;A handy cheat sheet for these operations can be found at the
 &lt;a href="#cheat-sheet"&gt;end&lt;/a&gt; of this post.&lt;/p&gt;
-&lt;p&gt;But helping server or application administrators is not the only 
+&lt;p&gt;Helping server or application administrators, however, is not the only 
 motivation to learn at least a little bit on how networking
 on Linux platforms works. Not only are there things like
 &lt;a href="https://www.nvidia.com/en-us/networking/ethernet-switching/cumulus-linux/"&gt;Cumulus Linux&lt;/a&gt;
@@ -64,7 +64,7 @@ eth0             UP             &lt;span class="m"&gt;10&lt;/span&gt;.0.2.15/24 
 Furthermore, you can see their operational status (with lo being
 &lt;code&gt;UNKNOWN&lt;/code&gt; as it is a loopback interface) as well as any IP
 addresses configured on those devices.&lt;/p&gt;
-&lt;p&gt;Of course, most people don't type &lt;code&gt;show ip interface brief&lt;/code&gt; on
+&lt;p&gt;Most people don't type &lt;code&gt;show ip interface brief&lt;/code&gt; on
 Cisco gear - I myself shorten that to &lt;code&gt;sh ip int brief&lt;/code&gt; (which
 is still more characters than really necessary). Similar to that,
 I use &lt;code&gt;ip a&lt;/code&gt; on Linux devices. As you can see you can both shorten
@@ -138,7 +138,7 @@ to query the ARP table of the Linux host:&lt;/p&gt;
 &lt;span class="m"&gt;10&lt;/span&gt;.0.2.2 dev eth0 lladdr &lt;span class="m"&gt;52&lt;/span&gt;:54:00:12:35:02 REACHABLE 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;With these simple commands you can already a lot of common
+&lt;p&gt;With these straight-forward commands you can already a lot of common
 networking issues on Linux systems I have encountered:
 - Wrongly configured subnet masks
 - Missing (default) routes 
@@ -586,7 +586,7 @@ AMD processor I was faced with the following challenges:&lt;/p&gt;
 the problem. Seeing as I was already running Docker and GNS3 on an Ubuntu device I figured it should be possible to expose both of that to a Windows host through a (non Hyper-V!) VM.&lt;/p&gt;
 &lt;h2&gt;Installing GNS3 in a Ubuntu VM&lt;/h2&gt;
 &lt;p&gt;&lt;em&gt;You need a working Ubuntu VM with a network interface bridged to the internet-facing interface of the host system to
-follow along. Seeing as there are already lots of very good tutorials on virtualization and the installation of Ubuntu
+follow along. Seeing as there are already lots of good tutorials on virtualization and the installation of Ubuntu
 I won't cover this here. Free options are for example &lt;a href="https://www.virtualbox.org/"&gt;VirtualBox&lt;/a&gt; or
 &lt;a href="https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html"&gt;VMWare Workstation Player&lt;/a&gt;
 (assuming you use it non-commercially).&lt;/em&gt;&lt;/p&gt;
