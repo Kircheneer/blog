@@ -5,7 +5,7 @@ AUTHOR = "Leo Kirchner"
 SITENAME = "Kirchnered Networking"
 SITEURL = ""
 SITETITLE = SITENAME
-SITESUBTITLE = "Network Engineer"
+SITESUBTITLE = "Network Automation Engineer"
 PATH = "content"
 STATIC_PATHS = ["images", "extra/CNAME"]
 TIMEZONE = "Europe/Berlin"
@@ -34,8 +34,8 @@ MENUITEMS = (
 BROWSER_COLOR = "#333"
 RELATIVE_URLS = False
 EXTRA_PATH_METADATA = {
-    'extra/CNAME': {'path': 'CNAME'},
-    '.nojekyll': {'path': '.nojekyll'}
+    "extra/CNAME": {"path": "CNAME"},
+    ".nojekyll": {"path": ".nojekyll"},
 }
 GOOGLE_ANALYTICS = "UA-183762699-1"
-COPYRIGHT_YEAR = 2021
+COPYRIGHT_YEAR = 2022
