@@ -24,7 +24,7 @@ the problem. Seeing as I was already running Docker and GNS3 on an Ubuntu device
 ## Installing GNS3 in a Ubuntu VM
 
 *You need a working Ubuntu VM with a network interface bridged to the internet-facing interface of the host system to
-follow along. Seeing as there are already lots of very good tutorials on virtualization and the installation of Ubuntu
+follow along. Seeing as there are already lots of good tutorials on virtualization and the installation of Ubuntu
 I won't cover this here. Free options are for example [VirtualBox](https://www.virtualbox.org/) or
 [VMWare Workstation Player](https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html)
 (assuming you use it non-commercially).*

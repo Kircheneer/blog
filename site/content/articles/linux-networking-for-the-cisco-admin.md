@@ -21,7 +21,7 @@ with in this regard are the following:
 A handy cheat sheet for these operations can be found at the
 [end](#cheat-sheet) of this post.
 
-But helping server or application administrators is not the only 
+Helping server or application administrators, however, is not the only 
 motivation to learn at least a little bit on how networking
 on Linux platforms works. Not only are there things like
 [Cumulus Linux](https://www.nvidia.com/en-us/networking/ethernet-switching/cumulus-linux/)
@@ -76,7 +76,7 @@ Furthermore, you can see their operational status (with lo being
 `UNKNOWN` as it is a loopback interface) as well as any IP
 addresses configured on those devices.
 
-Of course, most people don't type `show ip interface brief` on
+Most people don't type `show ip interface brief` on
 Cisco gear - I myself shorten that to `sh ip int brief` (which
 is still more characters than really necessary). Similar to that,
 I use `ip a` on Linux devices. As you can see you can both shorten
@@ -159,7 +159,7 @@ $ ip neigh show
 10.0.2.2 dev eth0 lladdr 52:54:00:12:35:02 REACHABLE 
 ```
 
-With these simple commands you can already a lot of common
+With these straight-forward commands you can already a lot of common
 networking issues on Linux systems I have encountered:
 - Wrongly configured subnet masks
 - Missing (default) routes 
