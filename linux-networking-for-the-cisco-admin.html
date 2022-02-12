@@ -10,19 +10,19 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/stylesheet/style.min.css">
+    <link rel="stylesheet" type="text/css" href="https://blog.kirchne.red/theme/stylesheet/style.min.css">
 
 
     <link id="pygments-light-theme" rel="stylesheet" type="text/css"
-          href="https://kircheneer.github.io/blog/theme/pygments/github.min.css">
+          href="https://blog.kirchne.red/theme/pygments/github.min.css">
 
 
-  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/fontawesome.css">
-  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/brands.css">
-  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/solid.css">
+  <link rel="stylesheet" type="text/css" href="https://blog.kirchne.red/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://blog.kirchne.red/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://blog.kirchne.red/theme/font-awesome/css/solid.css">
 
 
-    <link href="https://kircheneer.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
+    <link href="https://blog.kirchne.red/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
 
 
     <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
@@ -58,11 +58,11 @@
 <meta property="og:title" content="Linux Networking for the Cisco Admin"/>
 <meta property="og:description" content="If your job as a network administrator is anything like mine then you often get pulled somewhat out of your comfort zone by supposed network issues in end hosts. Some of the problems I&#39;ve had to deal with in this regard are the following: Servers with multiple network interfaces where …"/>
 <meta property="og:locale" content="en_US"/>
-<meta property="og:url" content="https://kircheneer.github.io/blog/linux-networking-for-the-cisco-admin.html"/>
+<meta property="og:url" content="https://blog.kirchne.red/linux-networking-for-the-cisco-admin.html"/>
 <meta property="og:type" content="article"/>
 <meta property="article:published_time" content="2021-05-22 16:00:00+02:00"/>
 <meta property="article:modified_time" content=""/>
-<meta property="article:author" content="https://kircheneer.github.io/blog/author/kirchnerl.html">
+<meta property="article:author" content="https://blog.kirchne.red/author/kirchnerl.html">
 <meta property="article:section" content="Networking"/>
 <meta property="article:tag" content="cisco"/>
 <meta property="article:tag" content="linux"/>
@@ -74,12 +74,12 @@
 <body class="light-theme">
   <aside>
     <div>
-      <a href="https://kircheneer.github.io/blog">
+      <a href="https://blog.kirchne.red">
         <img src="/images/profile.png" alt="Kirchnered Networking" title="Kirchnered Networking">
       </a>
 
       <h1>
-        <a href="https://kircheneer.github.io/blog">Kirchnered Networking</a>
+        <a href="https://blog.kirchne.red">Kirchnered Networking</a>
       </h1>
 
 <p>Network Engineer</p>
@@ -103,13 +103,13 @@
   <main>
 
     <nav>
-      <a href="https://kircheneer.github.io/blog">Home</a>
+      <a href="https://blog.kirchne.red">Home</a>
 
       <a href="/archives.html">Archives</a>
       <a href="/categories.html">Categories</a>
       <a href="/tags.html">Tags</a>
 
-      <a href="https://kircheneer.github.io/blog/feeds/all.atom.xml">Atom</a>
+      <a href="https://blog.kirchne.red/feeds/all.atom.xml">Atom</a>
 
     </nav>
 
@@ -118,7 +118,7 @@
       
     <h1 id="linux-networking-for-the-cisco-admin">Linux Networking for the Cisco Admin</h1>
     <p>
-      Posted on Sat 22 May 2021 in <a href="https://kircheneer.github.io/blog/category/networking.html">Networking</a>
+      Posted on Sa 22 Mai 2021 in <a href="https://blog.kirchne.red/category/networking.html">Networking</a>
 
     </p>
   </header>
@@ -234,23 +234,23 @@ For comparison, here's a short excerpt from the Cisco
 CLI containing the same kinds of routes (except for the
 default route which is statically configured instead of
 being issued by DHCP).</p>
-<div class="highlight"><pre><span></span><code><span class="n">Switch</span><span class="c1">#show ip route</span>
-<span class="n">Codes</span><span class="p">:</span> <span class="n">L</span> <span class="o">-</span> <span class="n">local</span><span class="p">,</span> <span class="n">C</span> <span class="o">-</span> <span class="n">connected</span><span class="p">,</span> <span class="n">S</span> <span class="o">-</span> <span class="k">static</span><span class="p">,</span> <span class="n">R</span> <span class="o">-</span> <span class="n">RIP</span><span class="p">,</span> <span class="n">M</span> <span class="o">-</span> <span class="n">mobile</span><span class="p">,</span> <span class="n">B</span> <span class="o">-</span> <span class="n">BGP</span>
-       <span class="n">D</span> <span class="o">-</span> <span class="n">EIGRP</span><span class="p">,</span> <span class="n">EX</span> <span class="o">-</span> <span class="n">EIGRP</span> <span class="n">external</span><span class="p">,</span> <span class="n">O</span> <span class="o">-</span> <span class="n">OSPF</span><span class="p">,</span> <span class="n">IA</span> <span class="o">-</span> <span class="n">OSPF</span> <span class="n">inter</span> <span class="n">area</span>
-       <span class="n">N1</span> <span class="o">-</span> <span class="n">OSPF</span> <span class="n">NSSA</span> <span class="n">external</span> <span class="n">type</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N2</span> <span class="o">-</span> <span class="n">OSPF</span> <span class="n">NSSA</span> <span class="n">external</span> <span class="n">type</span> <span class="mi">2</span>
-       <span class="n">E1</span> <span class="o">-</span> <span class="n">OSPF</span> <span class="n">external</span> <span class="n">type</span> <span class="mi">1</span><span class="p">,</span> <span class="n">E2</span> <span class="o">-</span> <span class="n">OSPF</span> <span class="n">external</span> <span class="n">type</span> <span class="mi">2</span>
-       <span class="n">i</span> <span class="o">-</span> <span class="n">IS</span><span class="o">-</span><span class="n">IS</span><span class="p">,</span> <span class="n">su</span> <span class="o">-</span> <span class="n">IS</span><span class="o">-</span><span class="n">IS</span> <span class="n">summary</span><span class="p">,</span> <span class="n">L1</span> <span class="o">-</span> <span class="n">IS</span><span class="o">-</span><span class="n">IS</span> <span class="n">level</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">L2</span> <span class="o">-</span> <span class="n">IS</span><span class="o">-</span><span class="n">IS</span> <span class="n">level</span><span class="o">-</span><span class="mi">2</span>
-       <span class="n">ia</span> <span class="o">-</span> <span class="n">IS</span><span class="o">-</span><span class="n">IS</span> <span class="n">inter</span> <span class="n">area</span><span class="p">,</span> <span class="o">*</span> <span class="o">-</span> <span class="n">candidate</span> <span class="n">default</span><span class="p">,</span> <span class="n">U</span> <span class="o">-</span> <span class="n">per</span><span class="o">-</span><span class="n">user</span> <span class="k">static</span> <span class="n">route</span>
-       <span class="n">o</span> <span class="o">-</span> <span class="n">ODR</span><span class="p">,</span> <span class="n">P</span> <span class="o">-</span> <span class="n">periodic</span> <span class="n">downloaded</span> <span class="k">static</span> <span class="n">route</span><span class="p">,</span> <span class="n">H</span> <span class="o">-</span> <span class="n">NHRP</span><span class="p">,</span> <span class="n">l</span> <span class="o">-</span> <span class="n">LISP</span>
-       <span class="n">a</span> <span class="o">-</span> <span class="n">application</span> <span class="n">route</span>
-       <span class="o">+</span> <span class="o">-</span> <span class="n">replicated</span> <span class="n">route</span><span class="p">,</span> <span class="o">%</span> <span class="o">-</span> <span class="n">next</span> <span class="n">hop</span> <span class="n">override</span>
+<div class="highlight"><pre><span></span><code><span class="n">Switch</span><span class="c1">#show ip route</span><span class="w"></span>
+<span class="n">Codes</span><span class="p">:</span><span class="w"> </span><span class="n">L</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">local</span><span class="p">,</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">connected</span><span class="p">,</span><span class="w"> </span><span class="n">S</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">static</span><span class="p">,</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">RIP</span><span class="p">,</span><span class="w"> </span><span class="n">M</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">mobile</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">BGP</span><span class="w"></span>
+<span class="w">       </span><span class="n">D</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">EIGRP</span><span class="p">,</span><span class="w"> </span><span class="n">EX</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">EIGRP</span><span class="w"> </span><span class="n">external</span><span class="p">,</span><span class="w"> </span><span class="n">O</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">OSPF</span><span class="p">,</span><span class="w"> </span><span class="n">IA</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">OSPF</span><span class="w"> </span><span class="n">inter</span><span class="w"> </span><span class="n">area</span><span class="w"></span>
+<span class="w">       </span><span class="n">N1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">OSPF</span><span class="w"> </span><span class="n">NSSA</span><span class="w"> </span><span class="n">external</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">N2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">OSPF</span><span class="w"> </span><span class="n">NSSA</span><span class="w"> </span><span class="n">external</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="w">       </span><span class="n">E1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">OSPF</span><span class="w"> </span><span class="n">external</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">E2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">OSPF</span><span class="w"> </span><span class="n">external</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="w">       </span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">IS</span><span class="o">-</span><span class="n">IS</span><span class="p">,</span><span class="w"> </span><span class="n">su</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">IS</span><span class="o">-</span><span class="n">IS</span><span class="w"> </span><span class="n">summary</span><span class="p">,</span><span class="w"> </span><span class="n">L1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">IS</span><span class="o">-</span><span class="n">IS</span><span class="w"> </span><span class="n">level</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">L2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">IS</span><span class="o">-</span><span class="n">IS</span><span class="w"> </span><span class="n">level</span><span class="o">-</span><span class="mi">2</span><span class="w"></span>
+<span class="w">       </span><span class="n">ia</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">IS</span><span class="o">-</span><span class="n">IS</span><span class="w"> </span><span class="n">inter</span><span class="w"> </span><span class="n">area</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">candidate</span><span class="w"> </span><span class="n">default</span><span class="p">,</span><span class="w"> </span><span class="n">U</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">per</span><span class="o">-</span><span class="n">user</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">route</span><span class="w"></span>
+<span class="w">       </span><span class="n">o</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ODR</span><span class="p">,</span><span class="w"> </span><span class="n">P</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">periodic</span><span class="w"> </span><span class="n">downloaded</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">route</span><span class="p">,</span><span class="w"> </span><span class="n">H</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">NHRP</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">LISP</span><span class="w"></span>
+<span class="w">       </span><span class="n">a</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">application</span><span class="w"> </span><span class="n">route</span><span class="w"></span>
+<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">replicated</span><span class="w"> </span><span class="n">route</span><span class="p">,</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">hop</span><span class="w"> </span><span class="n">override</span><span class="w"></span>
 
-<span class="n">Gateway</span> <span class="n">of</span> <span class="n">last</span> <span class="n">resort</span> <span class="k">is</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">2.1</span> <span class="n">to</span> <span class="n">network</span> <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span>
+<span class="n">Gateway</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">last</span><span class="w"> </span><span class="n">resort</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="mf">192.168</span><span class="o">.</span><span class="mf">2.1</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">network</span><span class="w"> </span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="w"></span>
 
-<span class="n">S</span><span class="o">*</span>    <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">0</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">0</span><span class="p">]</span> <span class="n">via</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">2.1</span>
-      <span class="mf">192.168</span><span class="o">.</span><span class="mf">2.0</span><span class="o">/</span><span class="mi">24</span> <span class="k">is</span> <span class="n">variably</span> <span class="n">subnetted</span><span class="p">,</span> <span class="mi">2</span> <span class="n">subnets</span><span class="p">,</span> <span class="mi">2</span> <span class="n">masks</span>
-<span class="n">C</span>        <span class="mf">192.168</span><span class="o">.</span><span class="mf">2.0</span><span class="o">/</span><span class="mi">24</span> <span class="k">is</span> <span class="n">directly</span> <span class="n">connected</span><span class="p">,</span> <span class="n">GigabitEthernet0</span><span class="o">/</span><span class="mi">0</span>
-<span class="n">L</span>        <span class="mf">192.168</span><span class="o">.</span><span class="mf">2.100</span><span class="o">/</span><span class="mi">32</span> <span class="k">is</span> <span class="n">directly</span> <span class="n">connected</span><span class="p">,</span> <span class="n">GigabitEthernet0</span><span class="o">/</span><span class="mi">0</span>
+<span class="n">S</span><span class="o">*</span><span class="w">    </span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">0</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="n">via</span><span class="w"> </span><span class="mf">192.168</span><span class="o">.</span><span class="mf">2.1</span><span class="w"></span>
+<span class="w">      </span><span class="mf">192.168</span><span class="o">.</span><span class="mf">2.0</span><span class="o">/</span><span class="mi">24</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">variably</span><span class="w"> </span><span class="n">subnetted</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="n">subnets</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="n">masks</span><span class="w"></span>
+<span class="n">C</span><span class="w">        </span><span class="mf">192.168</span><span class="o">.</span><span class="mf">2.0</span><span class="o">/</span><span class="mi">24</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">directly</span><span class="w"> </span><span class="n">connected</span><span class="p">,</span><span class="w"> </span><span class="n">GigabitEthernet0</span><span class="o">/</span><span class="mi">0</span><span class="w"></span>
+<span class="n">L</span><span class="w">        </span><span class="mf">192.168</span><span class="o">.</span><span class="mf">2.100</span><span class="o">/</span><span class="mi">32</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">directly</span><span class="w"> </span><span class="n">connected</span><span class="p">,</span><span class="w"> </span><span class="n">GigabitEthernet0</span><span class="o">/</span><span class="mi">0</span><span class="w"></span>
 </code></pre></div>
 
 <p>Finally there is <code>ip neigh</code> (equivalent to <code>show ip arp</code>) available
@@ -437,8 +437,8 @@ attempt at covering all there is to cover):</p>
   </div>
   <div class="tag-cloud">
     <p>
-      <a href="https://kircheneer.github.io/blog/tag/cisco.html">cisco</a>
-      <a href="https://kircheneer.github.io/blog/tag/linux.html">linux</a>
+      <a href="https://blog.kirchne.red/tag/cisco.html">cisco</a>
+      <a href="https://blog.kirchne.red/tag/linux.html">linux</a>
     </p>
   </div>
 
@@ -463,7 +463,7 @@ Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a 
   "@context" : "http://schema.org",
   "@type" : "Blog",
   "name": " Kirchnered Networking ",
-  "url" : "https://kircheneer.github.io/blog",
+  "url" : "https://blog.kirchne.red",
   "image": "/images/profile.png",
   "description": ""
 }

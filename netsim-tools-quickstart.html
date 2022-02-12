@@ -10,19 +10,19 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/stylesheet/style.min.css">
+    <link rel="stylesheet" type="text/css" href="https://blog.kirchne.red/theme/stylesheet/style.min.css">
 
 
     <link id="pygments-light-theme" rel="stylesheet" type="text/css"
-          href="https://kircheneer.github.io/blog/theme/pygments/github.min.css">
+          href="https://blog.kirchne.red/theme/pygments/github.min.css">
 
 
-  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/fontawesome.css">
-  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/brands.css">
-  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/solid.css">
+  <link rel="stylesheet" type="text/css" href="https://blog.kirchne.red/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://blog.kirchne.red/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://blog.kirchne.red/theme/font-awesome/css/solid.css">
 
 
-    <link href="https://kircheneer.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
+    <link href="https://blog.kirchne.red/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
 
 
     <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
@@ -58,11 +58,11 @@
 <meta property="og:title" content="A quick introduction to netsim-tools"/>
 <meta property="og:description" content="The somewhat newly released netsim-tools by Ivan Pepelnjak has been on my &#34;check-this-out&#34; list for a couple of weeks now. It contains a set of tools to simplify the process of creating virtual network labs. In the following sections I will lay out how to quickly get started with labbing …"/>
 <meta property="og:locale" content="en_US"/>
-<meta property="og:url" content="https://kircheneer.github.io/blog/netsim-tools-quickstart.html"/>
+<meta property="og:url" content="https://blog.kirchne.red/netsim-tools-quickstart.html"/>
 <meta property="og:type" content="article"/>
 <meta property="article:published_time" content="2021-05-13 14:44:00+02:00"/>
 <meta property="article:modified_time" content=""/>
-<meta property="article:author" content="https://kircheneer.github.io/blog/author/kirchnerl.html">
+<meta property="article:author" content="https://blog.kirchne.red/author/kirchnerl.html">
 <meta property="article:section" content="Networking"/>
 <meta property="article:tag" content="ansible"/>
 <meta property="article:tag" content="vagrant"/>
@@ -77,12 +77,12 @@
 <body class="light-theme">
   <aside>
     <div>
-      <a href="https://kircheneer.github.io/blog">
+      <a href="https://blog.kirchne.red">
         <img src="/images/profile.png" alt="Kirchnered Networking" title="Kirchnered Networking">
       </a>
 
       <h1>
-        <a href="https://kircheneer.github.io/blog">Kirchnered Networking</a>
+        <a href="https://blog.kirchne.red">Kirchnered Networking</a>
       </h1>
 
 <p>Network Engineer</p>
@@ -106,13 +106,13 @@
   <main>
 
     <nav>
-      <a href="https://kircheneer.github.io/blog">Home</a>
+      <a href="https://blog.kirchne.red">Home</a>
 
       <a href="/archives.html">Archives</a>
       <a href="/categories.html">Categories</a>
       <a href="/tags.html">Tags</a>
 
-      <a href="https://kircheneer.github.io/blog/feeds/all.atom.xml">Atom</a>
+      <a href="https://blog.kirchne.red/feeds/all.atom.xml">Atom</a>
 
     </nav>
 
@@ -121,7 +121,7 @@
       
     <h1 id="netsim-tools-quickstart">A quick introduction to netsim-tools</h1>
     <p>
-      Posted on Thu 13 May 2021 in <a href="https://kircheneer.github.io/blog/category/networking.html">Networking</a>
+      Posted on Do 13 Mai 2021 in <a href="https://blog.kirchne.red/category/networking.html">Networking</a>
 
     </p>
   </header>
@@ -157,23 +157,23 @@ to the power of Vagrant these instructions should work on any OS.</p>
 we will be using KVM inside of the Vagrant provisioned Ubuntu VM.</em></p>
 <p><em>Note: While I wrote the old version of this Vagrantfile myself, credit for
 the update to the pip-way of installing in this one goes to Ivan!</em></p>
-<div class="highlight"><pre><span></span><code><span class="n">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">)</span> <span class="n">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;ubuntu/focal64&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">do</span><span class="w"> </span><span class="o">|</span><span class="n">config</span><span class="o">|</span><span class="w"></span>
+<span class="w">  </span><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ubuntu/focal64&quot;</span><span class="w"></span>
 
-  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="s2">&quot;virtualbox&quot;</span> <span class="n">do</span> <span class="o">|</span><span class="n">vb</span><span class="o">|</span>
-    <span class="n">vb</span><span class="o">.</span><span class="n">memory</span> <span class="o">=</span> <span class="s2">&quot;8192&quot;</span>
-    <span class="n">vb</span><span class="o">.</span><span class="n">cpus</span> <span class="o">=</span> <span class="mi">4</span>
-    <span class="n">vb</span><span class="o">.</span><span class="n">customize</span> <span class="p">[</span><span class="s1">&#39;modifyvm&#39;</span><span class="p">,</span> <span class="p">:</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;--nested-hw-virt&#39;</span><span class="p">,</span> <span class="s1">&#39;on&#39;</span><span class="p">]</span>
-  <span class="n">end</span>
+<span class="w">  </span><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span><span class="w"> </span><span class="s2">&quot;virtualbox&quot;</span><span class="w"> </span><span class="n">do</span><span class="w"> </span><span class="o">|</span><span class="n">vb</span><span class="o">|</span><span class="w"></span>
+<span class="w">    </span><span class="n">vb</span><span class="o">.</span><span class="n">memory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;8192&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="n">vb</span><span class="o">.</span><span class="n">cpus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="w"></span>
+<span class="w">    </span><span class="n">vb</span><span class="o">.</span><span class="n">customize</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;modifyvm&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">:</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;--nested-hw-virt&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;on&#39;</span><span class="p">]</span><span class="w"></span>
+<span class="w">  </span><span class="n">end</span><span class="w"></span>
 
-  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span> <span class="n">inline</span><span class="p">:</span> <span class="o">&lt;&lt;-</span><span class="n">SHELL</span>
-    <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
-    <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">python3</span><span class="o">-</span><span class="n">pip</span>
-    <span class="n">pip3</span> <span class="n">install</span> <span class="n">netsim</span><span class="o">-</span><span class="n">tools</span>
-    <span class="n">netlab</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">ubuntu</span> <span class="n">ansible</span> <span class="n">libvirt</span>
-    <span class="n">usermod</span> <span class="o">-</span><span class="n">aG</span> <span class="n">libvirt</span> <span class="n">vagrant</span>
-  <span class="n">SHELL</span>
-<span class="n">end</span>
+<span class="w">  </span><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span><span class="w"> </span><span class="s2">&quot;shell&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">inline</span><span class="p">:</span><span class="w"> </span><span class="o">&lt;&lt;-</span><span class="n">SHELL</span><span class="w"></span>
+<span class="w">    </span><span class="n">apt</span><span class="o">-</span><span class="n">get</span><span class="w"> </span><span class="n">update</span><span class="w"></span>
+<span class="w">    </span><span class="n">apt</span><span class="o">-</span><span class="n">get</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="o">-</span><span class="n">y</span><span class="w"> </span><span class="n">python3</span><span class="o">-</span><span class="n">pip</span><span class="w"></span>
+<span class="w">    </span><span class="n">pip3</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="n">netsim</span><span class="o">-</span><span class="n">tools</span><span class="w"></span>
+<span class="w">    </span><span class="n">netlab</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="o">-</span><span class="n">y</span><span class="w"> </span><span class="n">ubuntu</span><span class="w"> </span><span class="n">ansible</span><span class="w"> </span><span class="n">libvirt</span><span class="w"></span>
+<span class="w">    </span><span class="n">usermod</span><span class="w"> </span><span class="o">-</span><span class="n">aG</span><span class="w"> </span><span class="n">libvirt</span><span class="w"> </span><span class="n">vagrant</span><span class="w"></span>
+<span class="w">  </span><span class="n">SHELL</span><span class="w"></span>
+<span class="n">end</span><span class="w"></span>
 </code></pre></div>
 
 <p>Make sure to adjust the <code>vb.memory</code> and <code>vg.cpus</code> settings to your needs.
@@ -257,19 +257,19 @@ the box, for the purposes of this tutorial I will be using the home folder.</p>
 <p><em>Note: As mentioned above, if you skipped the NXOS 9000v part you can use
 "cumulus" as the device type here and it will just work without
 any further preparation.</em></p>
-<div class="highlight"><pre><span></span><code><span class="nt">module</span><span class="p">:</span> <span class="p p-Indicator">[</span> <span class="nv">bgp</span><span class="p p-Indicator">,</span> <span class="nv">ospf</span> <span class="p p-Indicator">]</span>
+<div class="highlight"><pre><span></span><code><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="w"> </span><span class="nv">bgp</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">ospf</span><span class="w"> </span><span class="p p-Indicator">]</span><span class="w"></span>
 
-<span class="nt">bgp</span><span class="p">:</span>
-  <span class="nt">as</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">65000</span>
-<span class="nt">ospf</span><span class="p">:</span>
-  <span class="nt">area</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
-<span class="nt">defaults</span><span class="p">:</span>
-  <span class="nt">device</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">nxos</span>
-<span class="nt">nodes</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">r1</span>
-  <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">r2</span>
-<span class="nt">links</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">r1-r2</span>
+<span class="nt">bgp</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000</span><span class="w"></span>
+<span class="nt">ospf</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">area</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span><span class="w"></span>
+<span class="nt">defaults</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nxos</span><span class="w"></span>
+<span class="nt">nodes</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">r1</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">r2</span><span class="w"></span>
+<span class="nt">links</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">r1-r2</span><span class="w"></span>
 </code></pre></div>
 
 <p>This describes two connected Cisco NXOS with basic OSPF config to ensure
@@ -379,11 +379,11 @@ for reading!</p>
   </div>
   <div class="tag-cloud">
     <p>
-      <a href="https://kircheneer.github.io/blog/tag/ansible.html">ansible</a>
-      <a href="https://kircheneer.github.io/blog/tag/vagrant.html">vagrant</a>
-      <a href="https://kircheneer.github.io/blog/tag/libvirt.html">libvirt</a>
-      <a href="https://kircheneer.github.io/blog/tag/cisco.html">cisco</a>
-      <a href="https://kircheneer.github.io/blog/tag/linux.html">linux</a>
+      <a href="https://blog.kirchne.red/tag/ansible.html">ansible</a>
+      <a href="https://blog.kirchne.red/tag/vagrant.html">vagrant</a>
+      <a href="https://blog.kirchne.red/tag/libvirt.html">libvirt</a>
+      <a href="https://blog.kirchne.red/tag/cisco.html">cisco</a>
+      <a href="https://blog.kirchne.red/tag/linux.html">linux</a>
     </p>
   </div>
 
@@ -408,7 +408,7 @@ Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a 
   "@context" : "http://schema.org",
   "@type" : "Blog",
   "name": " Kirchnered Networking ",
-  "url" : "https://kircheneer.github.io/blog",
+  "url" : "https://blog.kirchne.red",
   "image": "/images/profile.png",
   "description": ""
 }

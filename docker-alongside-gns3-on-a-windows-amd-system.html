@@ -10,19 +10,19 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/stylesheet/style.min.css">
+    <link rel="stylesheet" type="text/css" href="https://blog.kirchne.red/theme/stylesheet/style.min.css">
 
 
     <link id="pygments-light-theme" rel="stylesheet" type="text/css"
-          href="https://kircheneer.github.io/blog/theme/pygments/github.min.css">
+          href="https://blog.kirchne.red/theme/pygments/github.min.css">
 
 
-  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/fontawesome.css">
-  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/brands.css">
-  <link rel="stylesheet" type="text/css" href="https://kircheneer.github.io/blog/theme/font-awesome/css/solid.css">
+  <link rel="stylesheet" type="text/css" href="https://blog.kirchne.red/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="https://blog.kirchne.red/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="https://blog.kirchne.red/theme/font-awesome/css/solid.css">
 
 
-    <link href="https://kircheneer.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
+    <link href="https://blog.kirchne.red/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kirchnered Networking Atom">
 
 
     <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
@@ -58,11 +58,11 @@
 <meta property="og:title" content="Docker alongside GNS3 on a Windows / AMD system"/>
 <meta property="og:description" content="When trying to run Docker and GNS3 on the same Windows system with an AMD processor I was faced with the following challenges: Docker for Desktop on Windows requires Hyper-V or WSL2, the latter in turn requires Hyper-V Hyper-V on AMD processors only supports nested virtualization as of 2020 (in …"/>
 <meta property="og:locale" content="en_US"/>
-<meta property="og:url" content="https://kircheneer.github.io/blog/docker-alongside-gns3-on-a-windows-amd-system.html"/>
+<meta property="og:url" content="https://blog.kirchne.red/docker-alongside-gns3-on-a-windows-amd-system.html"/>
 <meta property="og:type" content="article"/>
 <meta property="article:published_time" content="2020-11-23 19:49:00+01:00"/>
 <meta property="article:modified_time" content=""/>
-<meta property="article:author" content="https://kircheneer.github.io/blog/author/kirchnerl.html">
+<meta property="article:author" content="https://blog.kirchne.red/author/kirchnerl.html">
 <meta property="article:section" content="Networking"/>
 <meta property="article:tag" content="GNS3"/>
 <meta property="article:tag" content="Linux"/>
@@ -75,12 +75,12 @@
 <body class="light-theme">
   <aside>
     <div>
-      <a href="https://kircheneer.github.io/blog">
+      <a href="https://blog.kirchne.red">
         <img src="/images/profile.png" alt="Kirchnered Networking" title="Kirchnered Networking">
       </a>
 
       <h1>
-        <a href="https://kircheneer.github.io/blog">Kirchnered Networking</a>
+        <a href="https://blog.kirchne.red">Kirchnered Networking</a>
       </h1>
 
 <p>Network Engineer</p>
@@ -104,13 +104,13 @@
   <main>
 
     <nav>
-      <a href="https://kircheneer.github.io/blog">Home</a>
+      <a href="https://blog.kirchne.red">Home</a>
 
       <a href="/archives.html">Archives</a>
       <a href="/categories.html">Categories</a>
       <a href="/tags.html">Tags</a>
 
-      <a href="https://kircheneer.github.io/blog/feeds/all.atom.xml">Atom</a>
+      <a href="https://blog.kirchne.red/feeds/all.atom.xml">Atom</a>
 
     </nav>
 
@@ -119,7 +119,7 @@
       
     <h1 id="docker-alongside-gns3-on-a-windows-amd-system">Docker alongside GNS3 on a Windows / AMD system</h1>
     <p>
-      Posted on Mon 23 November 2020 in <a href="https://kircheneer.github.io/blog/category/networking.html">Networking</a>
+      Posted on Mo 23 November 2020 in <a href="https://blog.kirchne.red/category/networking.html">Networking</a>
 
     </p>
   </header>
@@ -224,8 +224,8 @@ daemon.</p>
 </code></pre></div>
 
 <p>Finishing up, we need to reload the service files and then restart the service.</p>
-<div class="highlight"><pre><span></span><code><span class="o">$</span> <span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
-<span class="o">$</span> <span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">docker</span>
+<div class="highlight"><pre><span></span><code><span class="o">$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="n">systemctl</span><span class="w"> </span><span class="n">daemon</span><span class="o">-</span><span class="n">reload</span><span class="w"></span>
+<span class="o">$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="n">systemctl</span><span class="w"> </span><span class="n">restart</span><span class="w"> </span><span class="n">docker</span><span class="w"></span>
 </code></pre></div>
 
 <p>Your Docker daemon should now be up and running:</p>
@@ -246,7 +246,7 @@ CLI from your Windows host:</p>
 <div class="highlight"><pre><span></span><code><span class="n">PS</span><span class="p">&gt;</span> <span class="n">docker</span> <span class="n">run</span> <span class="n">hello-world</span>
  <span class="n">Hello</span> <span class="n">from</span> <span class="n">Docker</span><span class="p">!</span>
  <span class="n">This</span> <span class="n">message</span> <span class="n">shows</span> <span class="n">that</span> <span class="n">your</span> <span class="n">installation</span> <span class="n">appears</span> <span class="n">to</span> <span class="n">be</span> <span class="n">working</span> <span class="n">correctly</span><span class="p">.</span>
- <span class="n">To</span> <span class="n">generate</span> <span class="n">this</span> <span class="n">message</span><span class="p">,</span> <span class="n">Docker</span> <span class="n">took</span> <span class="n">the</span> <span class="n">following</span> <span class="n">steps</span><span class="err">:</span>
+ <span class="n">To</span> <span class="n">generate</span> <span class="n">this</span> <span class="n">message</span><span class="p">,</span> <span class="n">Docker</span> <span class="n">took</span> <span class="n">the</span> <span class="n">following</span> <span class="n">steps</span><span class="p">:</span>
  <span class="n">The</span> <span class="n">Docker</span> <span class="n">client</span> <span class="n">contacted</span> <span class="n">the</span> <span class="n">Docker</span> <span class="n">daemon</span><span class="p">.</span>
  <span class="n">The</span> <span class="n">Docker</span> <span class="n">daemon</span> <span class="n">pulled</span> <span class="n">the</span> <span class="s2">&quot;hello-world&quot;</span> <span class="n">image</span> <span class="n">from</span> <span class="n">the</span> <span class="n">Docker</span> <span class="n">Hub</span><span class="p">.</span>
  <span class="p">(</span><span class="n">amd64</span><span class="p">)</span>
@@ -254,19 +254,19 @@ CLI from your Windows host:</p>
  <span class="n">executable</span> <span class="n">that</span> <span class="n">produces</span> <span class="n">the</span> <span class="n">output</span> <span class="n">you</span> <span class="n">are</span> <span class="n">currently</span> <span class="n">reading</span><span class="p">.</span>
  <span class="n">The</span> <span class="n">Docker</span> <span class="n">daemon</span> <span class="n">streamed</span> <span class="n">that</span> <span class="n">output</span> <span class="n">to</span> <span class="n">the</span> <span class="n">Docker</span> <span class="n">client</span><span class="p">,</span> <span class="n">which</span> <span class="n">sent</span> <span class="n">it</span>
  <span class="n">to</span> <span class="n">your</span> <span class="n">terminal</span><span class="p">.</span> 
- <span class="n">To</span> <span class="k">try</span> <span class="n">something</span> <span class="n">more</span> <span class="n">ambitious</span><span class="p">,</span> <span class="n">you</span> <span class="n">can</span> <span class="n">run</span> <span class="n">an</span> <span class="n">Ubuntu</span> <span class="n">container</span> <span class="n">with</span><span class="err">:</span>
+ <span class="n">To</span> <span class="k">try</span> <span class="n">something</span> <span class="n">more</span> <span class="n">ambitious</span><span class="p">,</span> <span class="n">you</span> <span class="n">can</span> <span class="n">run</span> <span class="n">an</span> <span class="n">Ubuntu</span> <span class="n">container</span> <span class="n">with</span><span class="p">:</span>
   <span class="p">$</span> <span class="n">docker</span> <span class="n">run</span> <span class="n">-it</span> <span class="n">ubuntu</span> <span class="n">bash</span>
- <span class="n">Share</span> <span class="n">images</span><span class="p">,</span> <span class="n">automate</span> <span class="n">workflows</span><span class="p">,</span> <span class="n">and</span> <span class="n">more</span> <span class="n">with</span> <span class="n">a</span> <span class="n">free</span> <span class="n">Docker</span> <span class="n">ID</span><span class="err">:</span>
-  <span class="n">https</span><span class="err">:</span><span class="p">//</span><span class="n">hub</span><span class="p">.</span><span class="n">docker</span><span class="p">.</span><span class="n">com</span><span class="p">/</span>
- <span class="k">For</span> <span class="n">more</span> <span class="n">examples</span> <span class="n">and</span> <span class="n">ideas</span><span class="p">,</span> <span class="n">visit</span><span class="err">:</span>
-  <span class="n">https</span><span class="err">:</span><span class="p">//</span><span class="n">docs</span><span class="p">.</span><span class="n">docker</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="nb">get-started</span><span class="p">/</span>
+ <span class="n">Share</span> <span class="n">images</span><span class="p">,</span> <span class="n">automate</span> <span class="n">workflows</span><span class="p">,</span> <span class="n">and</span> <span class="n">more</span> <span class="n">with</span> <span class="n">a</span> <span class="n">free</span> <span class="n">Docker</span> <span class="n">ID</span><span class="p">:</span>
+  <span class="n">https</span><span class="p">://</span><span class="n">hub</span><span class="p">.</span><span class="n">docker</span><span class="p">.</span><span class="n">com</span><span class="p">/</span>
+ <span class="k">For</span> <span class="n">more</span> <span class="n">examples</span> <span class="n">and</span> <span class="n">ideas</span><span class="p">,</span> <span class="n">visit</span><span class="p">:</span>
+  <span class="n">https</span><span class="p">://</span><span class="n">docs</span><span class="p">.</span><span class="n">docker</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="nb">get-started</span><span class="p">/</span>
 </code></pre></div>
   </div>
   <div class="tag-cloud">
     <p>
-      <a href="https://kircheneer.github.io/blog/tag/gns3.html">GNS3</a>
-      <a href="https://kircheneer.github.io/blog/tag/linux.html">Linux</a>
-      <a href="https://kircheneer.github.io/blog/tag/networking.html">Networking</a>
+      <a href="https://blog.kirchne.red/tag/gns3.html">GNS3</a>
+      <a href="https://blog.kirchne.red/tag/linux.html">Linux</a>
+      <a href="https://blog.kirchne.red/tag/networking.html">Networking</a>
     </p>
   </div>
 
@@ -291,7 +291,7 @@ Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a 
   "@context" : "http://schema.org",
   "@type" : "Blog",
   "name": " Kirchnered Networking ",
-  "url" : "https://kircheneer.github.io/blog",
+  "url" : "https://blog.kirchne.red",
   "image": "/images/profile.png",
   "description": ""
 }
